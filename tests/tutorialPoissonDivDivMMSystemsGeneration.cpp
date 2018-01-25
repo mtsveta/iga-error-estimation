@@ -78,18 +78,19 @@ int main(int argc, char *argv[])
     // Init the degree of the basis for the flux: y \in S^{p + k, p + k} + S^{p + k, p + k}, p = vDegree
     // yDegree must be >= 2 to ensure that S^{p + k, p + k} + S^{p + k, p + k} \subset H(\Omega, div§)
     int yDegree(vDegree + k);
-    int yBasisRefDelay(6);              // parameter for the delay in updating the flux
+    //int yBasisRefDelay(6);              // parameter for the delay in updating the flux
 
     // Refinement strategy
-    int numInitUniformRefV(0), numInitUniformRefY(0), numTotalAdaptRef(10);    // Number of initial uniform  and total adaptive refinement steps
+    int numTotalAdaptRef(10);    // Number of initial uniform  and total adaptive refinement steps
+    //int numInitUniformRefV(0), numInitUniformRefY(0);
     //MarkingStrategy adaptRefCrit(GARU); // with alternatives GARU, PUCA, and BULK
     //real_t markingParamTheta(0.1);
-    MarkingStrategy adaptRefCrit(BULK); // with alternatives GARU, PUCA, and BULK
-    real_t markingParamTheta(0.4);
+    //MarkingStrategy adaptRefCrit(BULK); // with alternatives GARU, PUCA, and BULK
+    //real_t markingParamTheta(0.4);
 
     /*
     if (saveToFile) {
-        testMajorant.gsCreateResuxltsFolder(saveToFile, exampleNumber, vDegree, yDegree, yBasisRefDelay,
+        testMajorant.gsCreateResultsFolder(saveToFile, vDegree, yDegree, yBasisRefDelay,
                                            numTotalAdaptRef, adaptRefCrit, markingParamTheta);
     }
     */
@@ -116,6 +117,7 @@ int main(int argc, char *argv[])
     //! [Define Auxiliary Structures for Storing of the Results]
     // -------------------------------------------------------------------------------------------------------------- //
     // Initialize arrays to DOFs for v and y on each refinement step
+
     gsVector<index_t> vDOFs(numTotalAdaptRef), yDOFs(numTotalAdaptRef);
     // Initialize vectors with assembling and computation times on each refinement step
     gsVector<double> timeAsmbV(numTotalAdaptRef),
@@ -127,6 +129,8 @@ int main(int argc, char *argv[])
     // [1] is the iterative solver
     gsMatrix<double> timeSolvV(numTotalAdaptRef, numOfSolvers);
     timeSolvV.setZero(numTotalAdaptRef, 2);
+
+    gsVector<real_t> stopcritVector(numTotalAdaptRef-1);
 
     // Initialize vector of all the basis' for y to store the history along the refinement
     std::vector< gsMultiBasis<> > basisYVector;
@@ -154,13 +158,14 @@ int main(int argc, char *argv[])
         gsInfo << "time for assembling PDE: " << timeAsmbV[refCounter] << " sec.\n";
 
         if (saveToFile)
-            testMajorant.gsSaveToFileKMatrix(true, poissonAssembler, refCounter, exampleNumber);
+            testMajorant.gsSaveToFileKMatrix(true, poissonAssembler, refCounter);
         //! [Assemble System of Discretized Poisson Equation]
 
         //! [Solve System]
         // ---------------------------------------------------------------------------------------------------------- //
         gsMatrix<> vVector(1, 1);
-        testMajorant.gsSolveKhfhSystem(poissonAssembler, vVector, timeSolvV, refCounter, vDOFs);
+        stopcritVector[refCounter-1] = poissonAssembler.multiBasis(0).basis(0).getMaxCellLength();
+        testMajorant.gsSolveKhfhSystem(poissonAssembler, vVector, timeSolvV, refCounter, stopcritVector);
          //! [SolvevSystem]
 
         //! [Recover the Approximation Field]

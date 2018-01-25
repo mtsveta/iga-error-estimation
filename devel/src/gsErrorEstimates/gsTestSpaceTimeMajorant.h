@@ -429,33 +429,18 @@ namespace gismo {
 
                     cFriedrichs = 1.0 / (math::sqrt((real_t) 1 / (real_t) 2) * PI);   // cFriedrichs <= 1 / (pi * sqrt(l_1^{-2} + ... + l_n^{-2}));
                     domainName = "quarter-annulus lifted in time";
-                    //gsWriteParaview(patches, this->resultFolder + "/" + "annalus-3d", 5001, true);
                 }
-                /*
-                else if (exampleNumber == 22) {
-                    // --------------------------------------------------------------------------------
-                    //  Annulus domains examples
-                    // --------------------------------------------------------------------------------
-                    std::string fileSrc(GISMO_DATA_DIR "/volumes/cylinder.xml");
-                    patches = static_cast<gsMultiPatch<> > (gsReadFile<real_t>(fileSrc));
-                    cFriedrichs = 1.0 / (math::sqrt((real_t) 1 / (real_t) 2) *
-                                         PI);   // cFriedrichs <= 1 / (pi * sqrt(l_1^{-2} + ... + l_n^{-2}));
-                    domainName = "quarter-annulus + time";
-                    //gsWriteParaview(v, this->resultFolder + "/" + vPhys, 5001, true);
-                }
-                 */
-                    /*
                 else if (exampleNumber == 15)
                 {
                     // --------------------------------------------------------------------------------
                     //  3d L-shaped domain
                     // --------------------------------------------------------------------------------
-                    //patches = NULL;
-                    //cFriedrichs = 1.0 / (math::sqrt(1.0 / 2.0) * PI);
-                    //domainName = "L-shape, 3d";
-
+                    real_t z(1.0);
+                    gsTensorBSpline<2,real_t>::uPtr geo2D = gsNurbsCreator<>::BSplineLShape_p2C1();
+                    patches = * gsNurbsCreator<>::lift3D(*geo2D, z);
+                    cFriedrichs = 1.0 / (math::sqrt(1.0 / 2.0) * PI);
+                    domainName = "L-shape, 3d";
                 }
-                     */
                 break;
 
             default:

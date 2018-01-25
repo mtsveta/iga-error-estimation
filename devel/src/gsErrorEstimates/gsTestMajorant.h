@@ -36,7 +36,7 @@ namespace gismo {
 
         void gsLogProblemData();
 
-        void gsCreateResultsFolder(bool, const unsigned , int, int, int, int, int, int, MarkingStrategy, real_t);
+        void gsCreateResultsFolder(bool, int, int, int, int, int, int, MarkingStrategy, real_t);
 
         void gsLogRefinementBasisInfo(int, const int, int, gsMultiBasis<> &, gsMultiBasis<> & , gsMultiBasis<> & );
 
@@ -133,30 +133,28 @@ namespace gismo {
                                                  std::vector<real_t> edDistr,
                                                  std::vector<real_t> mdDistr,
                                                  std::vector<real_t> etaDistr,
-                                                 int refCounter, int refTotal,
-                                                 const unsigned exampleNumber);
+                                                 int refCounter, int refTotal);
 
         void gsSaveToFileTestResults(bool save,
                                      gsVector<index_t> &vDOFs, gsVector<index_t> &yDOFs, gsVector<index_t> &wDOFs,
                                      gsVector<real_t> &eVector, gsVector<real_t> &majVector, gsVector<real_t> &minVector, gsVector<real_t> &etaVector,
-                                     int refTotal,
-                                     const unsigned exampleNumber);
+                                     int refTotal);
 
         void gsSaveToFileDivDivMMMatrices(bool, gsSparseMatrix<real_t> &, gsSparseMatrix<real_t> &,
-                                          int refCounter, const unsigned exampleNumber);
+                                          int refCounter);
 
         void gsSaveToFileKMatrix(bool, gsPoissonAssembler<real_t> &,
-                                 int refCounter, const unsigned exampleNumber);
+                                 int refCounter);
 
-        void gsSetVVector(gsMatrix<> &vector){ this->vVector = vector; }
+        //void gsSetVVector(gsMatrix<> &vector){ this->vVector = vector; }
         void gsSetVRefVector(gsMatrix<> &vector){ this->vRefVector = vector; }
         gsMatrix<> getVRefVector(){ return this->vRefVector; }
 
-        void gsSetWVector(gsMatrix<> &vector){ this->wVector = vector; }
+        //void gsSetWVector(gsMatrix<> &vector){ this->wVector = vector; }
         void gsSetWRefVector(gsMatrix<> &vector){ this->wRefVector = vector; }
         gsMatrix<> getWRefVector(){ return this->wRefVector; }
 
-        void gsSetYVector(gsMatrix<> & vector){ this->yVector = vector; }
+        //void gsSetYVector(gsMatrix<> & vector){ this->yVector = vector; }
         void gsSetYRefVector(gsMatrix<> & vector){ this->yRefVector = vector; }
         gsMatrix<> gsGetYRefVector(){ return this->yRefVector; }
 
@@ -187,13 +185,10 @@ namespace gismo {
         const bool isAdaptive;
 
     private:
-        gsMatrix<> vVector;
         gsMatrix<> vRefVector;
 
-        gsMatrix<> wVector;
         gsMatrix<> wRefVector;
 
-        gsMatrix<> yVector;
         gsMatrix<> yRefVector;
 
     };
@@ -449,8 +444,7 @@ namespace gismo {
     }
 
     template<unsigned d>
-    void gsTestMajorant<d>::gsCreateResultsFolder(bool save, const unsigned exampleNumber,
-                                                  int vDegree, int yDegree, int wDegree,
+    void gsTestMajorant<d>::gsCreateResultsFolder(bool save, int vDegree, int yDegree, int wDegree,
                                                   int yBasisRefDelay, int wBasisRefDelay,
                                                   int numTotalAdaptRef, MarkingStrategy adaptRefCrit,
                                                   real_t markingParamTheta) {
@@ -581,7 +575,7 @@ namespace gismo {
         gsMatrix<real_t> divdivRhs = divdivAssembler.rhs();
         gsMatrix<real_t> vectmassRhs = dualAssembler.rhs();
 
-        this->gsSaveToFileDivDivMMMatrices(false, divdivM, vectmassM, refCounter, exampleNumber);
+        this->gsSaveToFileDivDivMMMatrices(false, divdivM, vectmassM, refCounter);
 
         gsSparseMatrix<real_t> yM;
         gsMatrix<real_t> yRhs;
@@ -1325,8 +1319,7 @@ namespace gismo {
                                                                 std::vector<real_t> edDistr,
                                                                 std::vector<real_t> mdDistr,
                                                                 std::vector<real_t> etaDistr,
-                                                                int refCounter, int refTotal,
-                                                                const unsigned exampleNumber) {
+                                                                int refCounter, int refTotal) {
         if (save) {
             // Saving Paraview files
             std::string refTag = util::to_string(exampleNumber) + "-refnum-"
@@ -1375,7 +1368,7 @@ namespace gismo {
     void gsTestMajorant<d>::gsSaveToFileTestResults(bool save,
                                                     gsVector<index_t> &vDOFs, gsVector<index_t> &yDOFs, gsVector<index_t> &wDOFs,
                                                     gsVector<real_t> &eVector, gsVector<real_t> &majVector, gsVector<real_t> &minVector, gsVector<real_t> &etaVector,
-                                                    int refTotal, const unsigned exampleNumber) {
+                                                    int refTotal) {
 
         if (save) {
             std::string refTag = util::to_string(exampleNumber);
@@ -1428,9 +1421,9 @@ namespace gismo {
 
     template<unsigned d>
     void gsTestMajorant<d>::gsSaveToFileDivDivMMMatrices(bool save,
-                                                         gsSparseMatrix<real_t> &DivDiv, gsSparseMatrix<real_t> &MM,
-                                                         int refCounter,
-                                                         const unsigned exampleNumber) {
+                                                         gsSparseMatrix<real_t> &DivDiv,
+                                                         gsSparseMatrix<real_t> &MM,
+                                                         int refCounter) {
         {
             if (save && refCounter <= 3 && ! this->isAdaptive) {
                 // Saving Paraview files
@@ -1478,8 +1471,7 @@ namespace gismo {
 
     template<unsigned d>
     void gsTestMajorant<d>::gsSaveToFileKMatrix(bool save,
-                                                gsPoissonAssembler<real_t> &assembler, int refCounter,
-                                                const unsigned exampleNumber) {
+                                                gsPoissonAssembler<real_t> &assembler, int refCounter) {
         {
             if (save) {
                 std::string refTag = "-refnum-" + util::to_string(refCounter) + "-example-"
@@ -1517,12 +1509,12 @@ namespace gismo {
             gsSparseSolver<>::LU solverLU;
             solverLU.compute(assembler.matrix());
             vVectorIter = solverLU.solve(assembler.rhs());
-            this->gsSetVVector(vVectorIter);
+            //this->gsSetVVector(vVectorIter);
 
         } else{
             if (!isAdaptive) { // defined v0 from the previous iteration only for uniform refinement
                 vVectorIter = this->getVRefVector();
-                this->gsSetVVector(vVectorIter);
+                //this->gsSetVVector(vVectorIter);
             }
         }
 
@@ -1597,12 +1589,12 @@ namespace gismo {
             gsSparseSolver<>::LU solverLU;
             solverLU.compute(assembler.matrix());
             wVectorIter = solverLU.solve(assembler.rhs());
-            this->gsSetWVector(wVectorIter);
+            //this->gsSetWVector(wVectorIter);
 
         } else{
             if (!isAdaptive) { // defined v0 from the previous iteration only for uniform refinement
                 wVectorIter = this->getWRefVector();
-                this->gsSetVVector(wVectorIter);
+                //this->gsSetVVector(wVectorIter);
             }
         }
 
@@ -1663,11 +1655,11 @@ namespace gismo {
             gsSparseSolver<>::LU solverLU;
             solverLU.compute(yM);
             yVectorIter = solverLU.solve(yRhs);
-            this->gsSetYVector(yVectorIter);
+            //this->gsSetYVector(yVectorIter);
 
         } else{
             yVectorIter = this->gsGetYRefVector();
-            this->gsSetYVector(yVectorIter);
+            //this->gsSetYVector(yVectorIter);
             //yVectorIter.resize(yDOFs[refCounter]*this->dim, 1);
             yVectorIter.resize(N, 1);
         }

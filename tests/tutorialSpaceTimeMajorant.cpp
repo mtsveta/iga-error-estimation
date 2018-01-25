@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
     // Define parameters of I/O
     bool plotToParaview = false; // Flag indicating whether objects must be plotted in ParaView
     bool saveToFile     = true;  // Flag indicating whether objects must be plotted in ParaView
-    bool isAdaptive     = true;
+    bool isAdaptive     = false;
     bool withMajorant   = true;
     bool withMajorantOptimization = true;
     bool withMajorantEqulibration = false;
@@ -95,10 +95,10 @@ int main(int argc, char *argv[])
     //const unsigned exampleNumber(20);     // 20 example: unit cube, u = sin(pi*x)*sin(pi*y)*sin(pi*t),        non-homogeneous BC
     //const unsigned exampleNumber(25);     // 25 example: unit cube, u = (1 - x)*x^2*(1 - y)*y^2*(1 - z)*z^2,  homogeneous BC
     //const unsigned exampleNumber(21);       // 21 example: unit cube, u = cos(x)*exp(y)*sin(pi*t),              non-homogeneous BC
-    const unsigned exampleNumber(23);     // 23 example: 2d+1 quater annulus + [0, 1] in time, u = (1 - x)*x^2*(1 - y)*y^2*(1 - z)*z^2
+    // const unsigned exampleNumber(23);     // 23 example: 2d+1 quater annulus + [0, 1] in time, u = (1 - x)*x^2*(1 - y)*y^2*(1 - z)*z^2
     //const unsigned exampleNumber(24);     // 24 example: 2d+1 quater annulus + [0, 1] in time, u = sin(pi*x)*sin(pi*y)*sin(pi*z)
     //const unsigned exampleNumber(26);       // 26 example: 2d+1 quater annulus + [0, 1] in time, u = (1 - x)*x^2*(1 - y)*y^2*(1 - z)*z^2
-    //const unsigned exampleNumber(27);     // 27 example: square x [0, 2], u = (1 - x)*x^2*(1 - y)*y^2*(2 - z)*z^2,  homogeneous BC
+    const unsigned exampleNumber(27);     // 27 example: square x [0, 2], u = (1 - x)*x^2*(1 - y)*y^2*(2 - z)*z^2,  homogeneous BC
     //const unsigned exampleNumber(28);     // 28 example: [0, 2] x [0, 1] x [0, 1], u = (2 - x)*x^2*(1 - y)*y^2*(1 - z)*z^2,  homogeneous BC
     //const unsigned exampleNumber(29);      // 29 example: [0, 2] x [0, 3] x [0, 1], u = (2 - x)*x^2*(3 - y)*y^2*(1 - z)*z^2,  homogeneous BC
     //const unsigned exampleNumber(30);      // 30 example: 2d+1 quater annulus + [0, 1] in time, u = (x^2 + y^2 - 1)*(x^2 + y^2 - 4)*(1 - z)*z^2,  homogeneous BC
@@ -122,7 +122,7 @@ int main(int argc, char *argv[])
 
     // Setting up the refinement strategy
     // Number of initial uniform and total unif./adapt. refinement steps
-    unsigned int numInitUniformRefV(3), numInitUniformRefY(3), numInitUniformRefW(3), numTotalAdaptRef(8);
+    unsigned int numInitUniformRefV(1), numInitUniformRefY(1), numInitUniformRefW(1), numTotalAdaptRef(8);
 
     MarkingStrategy adaptRefCrit(BULK); // with alternatives GARU, PUCA, and BULK
     //MarkingStrategy adaptRefCrit(GARU);
@@ -311,8 +311,8 @@ int main(int argc, char *argv[])
         solutionFieldVector.push_back(v);
         solutionMPVector.push_back(mpV);
 
-        std::string vPhys("v-" + refCount);
-        gsWriteParaview(v, testSpaceTime.resultFolder + "/" + vPhys, 5001, true);
+        std::string vPhys("v-init");
+        gsWriteParaview(v, vPhys, 5001, true);
 
         //! [Error, Majorant (Optimal Flux), and Residual Estimate Computation]
         // ---------------------------------------------------------------------------------------------------------- //

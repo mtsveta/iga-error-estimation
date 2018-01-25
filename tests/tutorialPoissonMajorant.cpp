@@ -14,7 +14,6 @@
 
 #include <iostream>
 #include <gismo.h>
-
 #include <gsAssembler/gsAdaptiveRefUtils.h>
 #include <gsAssembler/gsErrEstPoissonResidual.h>
 #include <gsErrorEstimates/gsTestMajorant.h>
@@ -103,7 +102,6 @@ int main(int argc, char *argv[])
     int wBasisRefDelay(6);
 
     testMajorant.gsCreateResultsFolder(saveToFile,
-                                       exampleNumber,
                                        vDegree, yDegree, wDegree,
                                        yBasisRefDelay, wBasisRefDelay,
                                        numTotalAdaptRef, adaptRefCrit, markingParamTheta);
@@ -178,7 +176,6 @@ int main(int argc, char *argv[])
 
     gsMultiPatch<> mpV, mpY, mpW;
     gsMatrix<> vVector(1, 1), yVector(1, 1), wVector(1, 1);
-    gsMatrix<> vRefVector(1, 1);
     gsField<> w;
     gsField<> v;
 
@@ -251,7 +248,8 @@ int main(int argc, char *argv[])
 
         clock.restart();
 
-        omp_set_nested(2);
+        // commentede ut to avoid the error in cdash
+        //omp_set_nested(2);
 
         //#pragma omp parallel sections
         {
@@ -406,8 +404,7 @@ int main(int argc, char *argv[])
             testMajorant.gsSaveToFileRefinementIterationInfo(saveToFile,
                                                              v, poissonAssembler.multiBasis(),
                                                              edDistr, mdDistr, etaDistr,
-                                                             refCount, numTotalAdaptRef,
-                                                             exampleNumber);
+                                                             refCount, numTotalAdaptRef);
         }
         //! [Refine]
         if (refCount < numTotalAdaptRef - 1) {
@@ -456,7 +453,7 @@ int main(int argc, char *argv[])
     testMajorant.gsSaveToFileTestResults(saveToFile,
                                          vDOFs, yDOFs, wDOFs,
                                          eH1Vector, majVector, minVector, etaVector,
-                                         numTotalAdaptRef, exampleNumber);
+                                         numTotalAdaptRef);
 
     gsInfo << "\nTotal execution time : " << clock_total.stop() << "\n";
     return 0;
