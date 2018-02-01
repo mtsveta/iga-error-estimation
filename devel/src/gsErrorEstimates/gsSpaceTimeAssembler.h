@@ -106,7 +106,6 @@ public:
     void basisUpdate(const gsMultiBasis<T> & bases){
         m_bases.clear();
         m_bases.push_back(bases);
-
     }
 
     void thetaUpdate(const gsFunctionExpr<real_t> & f, const gsFunctionExpr<real_t> & theta){

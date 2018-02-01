@@ -16,6 +16,8 @@
 #include <gsAssembler/gsAdaptiveRefUtils.h>
 #include <sys/stat.h>
 #include <fstream>
+#include <iostream>
+#include <string>
 #include <functional>
 #include <gsSolver/gsIterativeSolver.h>
 #include <gsSolver/gsSolverUtils.h>
@@ -250,17 +252,17 @@ namespace gismo {
         void gsSaveToFileKMatrix(bool, gsSpaceTimeAssembler<real_t> &,
                                  int refCounter, const unsigned exampleNumber);
 
-        void gsSetVVector(gsMatrix<> &vector){ this->vVector = vector; }
-        void gsSetVRefVector(gsMatrix<> &vector){ this->vRefVector = vector; }
-        gsMatrix<> getVRefVector(){ return this->vRefVector; }
+        void gsSetVVector(gsMatrix<> &vector){ vVector = vector; }
+        void gsSetVRefVector(gsMatrix<> &vector){ vRefVector = vector; }
+        gsMatrix<> getVRefVector(){ return vRefVector; }
 
-        void gsSetWVector(gsMatrix<> &vector){ this->wVector = vector; }
-        void gsSetWRefVector(gsMatrix<> &vector){ this->wRefVector = vector; }
-        gsMatrix<> getWRefVector(){ return this->wRefVector; }
+        void gsSetWVector(gsMatrix<> &vector){ wVector = vector; }
+        void gsSetWRefVector(gsMatrix<> &vector){ wRefVector = vector; }
+        gsMatrix<> getWRefVector(){ return wRefVector; }
 
-        void gsSetYVector(gsMatrix<> & vector){ this->yVector = vector; }
-        void gsSetYRefVector(gsMatrix<> & vector){ this->yRefVector = vector; }
-        gsMatrix<> gsGetYRefVector(){ return this->yRefVector; }
+        void gsSetYVector(gsMatrix<> & vector){ yVector = vector; }
+        void gsSetYRefVector(gsMatrix<> & vector){ yRefVector = vector; }
+        gsMatrix<> gsGetYRefVector(){ return yRefVector; }
 
         void gsInitializeBasis(int, gsMultiBasis<> &, int);
 
@@ -331,7 +333,8 @@ namespace gismo {
                 //  Unit-square domains examples
                 // --------------------------------------------------------------------------------
                 if (exampleNumber == 2 || exampleNumber == 3 || exampleNumber == 4 ||
-                        exampleNumber == 5 || exampleNumber == 6) {
+                        exampleNumber == 5 || exampleNumber == 6 || exampleNumber == 11 || exampleNumber == 12 ||
+                        exampleNumber == 16) {
                     real_t unit_side(1.0);
                     patches = *gsNurbsCreator<>::BSplineSquareGrid(NUM_PATCHES, NUM_PATCHES, unit_side);
                     cFriedrichs = 1.0 / (math::sqrt((real_t) (dim - 1)) * PI);
@@ -340,51 +343,38 @@ namespace gismo {
                     // --------------------------------------------------------------------------------
                     //  Rectangular domains examples
                     // --------------------------------------------------------------------------------
-                    real_t lx(2.0), ly(1.0), x0(0.0), y0(0.0);
+                    real_t x0(0.0), y0(0.0), lx(2.0), ly(1.0);
                     patches = *gsNurbsCreator<>::BSplineRectangle(x0, y0, lx, ly);
                     cFriedrichs = lx / PI;   // cFriedrichs <= 1 / (pi * sqrt(l_1^{-2} + ... + l_n^{-2}));
                     domainName = "rectangle $(0, 2) \\times (0, 1)$";
 
-                } else if (exampleNumber == 9){
+                } else if (exampleNumber == 9 || exampleNumber == 10 || exampleNumber == 33 || exampleNumber == 34){
                     // --------------------------------------------------------------------------------
                     //  Rectangular domains examples
                     // --------------------------------------------------------------------------------
-                    real_t lx(1.0), ly(2.0), x0(0.0), y0(0.0);
+                    real_t x0(0.0), y0(0.0), lx(1.0), ly(2.0);
                     patches = *gsNurbsCreator<>::BSplineRectangle(x0, y0, lx, ly);
                     cFriedrichs = lx / PI;   // cFriedrichs <= 1 / (pi * sqrt(l_1^{-2} + ... + l_n^{-2}));
-                    domainName = "rectangle $(0, 1) \\times (0, 2)$";
-
+                    domainName = "rectangle $(0, 1) x (0, 2)$";
                 }
 
                 break;
 
             case 3:
                 if (exampleNumber == 13 || exampleNumber == 17 || exampleNumber == 19 || exampleNumber == 20 ||
-                        exampleNumber == 21 || exampleNumber == 25) {
+                        exampleNumber == 21 || exampleNumber == 25 || exampleNumber == 31) {
                     patches = *gsNurbsCreator<>::BSplineCube(2);    // here 2 is the degree
                     cFriedrichs = 1.0 / (math::sqrt((real_t) (dim - 1)) * PI);
                     domainName = "unit cube";
-
-                } else if (exampleNumber == 11) {
-                    // --------------------------------------------------------------------------------
-                    //  Circle domains examples
-                    // --------------------------------------------------------------------------------
-                    real_t radius(1.0);
-                    patches = *gsNurbsCreator<>::BSplineFatCircle(radius, 0.0, 0.0);
-                    cFriedrichs = 1.0 / (math::sqrt((real_t) 1 / (real_t) 2) * PI);
-                    domainName = "cirle";
-
-                } else if (exampleNumber == 27) {
+                }
+                else if (exampleNumber == 27 || exampleNumber == 32) {
                     // --------------------------------------------------------------------------------
                     //  Unit square moving in time interval [0, 2]
                     // --------------------------------------------------------------------------------
-                    real_t lx(1.0), ly(1.0), x0(0.0), y0(0.0);
-                    real_t tT(1.0);
-                    //patches = *gsNurbsCreator<>::BSplineCuboid(x0, y0, t0, lx, ly, tT);
-                    //patches = *gsNurbsCreator<>::BSplineCube(x0, y0, t0, lx, ly, tT);
+                    real_t x0(0.0), y0(0.0), lx(1.0), ly(1.0);
+                    real_t tT(2.0);
                     gsTensorBSpline<2,real_t>::uPtr geo2D = gsNurbsCreator<>::BSplineRectangle(x0, y0, lx, ly);
                     patches = * gsNurbsCreator<>::lift3D(*geo2D, tT);
-                    //patches.uniformRefine();
                     cFriedrichs = 1.0 / (math::sqrt((real_t) (dim - 1)) * PI);
                     domainName = "unit square x [0, 2]";
                 }
@@ -435,9 +425,9 @@ namespace gismo {
                     // --------------------------------------------------------------------------------
                     //  3d L-shaped domain
                     // --------------------------------------------------------------------------------
-                    real_t z(1.0);
+                    real_t lz(2.0);
                     gsTensorBSpline<2,real_t>::uPtr geo2D = gsNurbsCreator<>::BSplineLShape_p2C1();
-                    patches = * gsNurbsCreator<>::lift3D(*geo2D, z);
+                    patches = * gsNurbsCreator<>::lift3D(*geo2D, lz);
                     cFriedrichs = 1.0 / (math::sqrt(1.0 / 2.0) * PI);
                     domainName = "L-shape, 3d";
                 }
@@ -510,28 +500,62 @@ namespace gismo {
                 break;
 
             case 9:
-            case 11:
-            case 12:
-            case 16:
-                uExpr = "if( y > 0, (x^2 + y^2)^(1.0/3.0) * sin( (2.0*atan2(y,x) - pi)/3.0 ), "
+
+                uExpr = "if( y > 0, (x^2 + y^2)^(1.0/3.0) * sin( (2.0*atan2(y,x) - pi)/3.0 ),"
                         "           (x^2 + y^2)^(1.0/3.0) * sin( (2.0*atan2(y,x) + 3.0*pi)/3.0 ) )";
-                fExpr = "if( y > 1, "
-                        "    1.0/3.0 * ((x - 1)^2 + (y - 1)^2)^(-2.0/3.0) * 2*(y - 1)* sin( (2.0*atan2(y - 1, x - 1) - pi)/3.0 ) + "
-                        "    ((x - 1)^2 + (y - 1)^2)^(1.0/3.0) * 2.0/3.0*cos( (2.0*atan2(y - 1, x - 1) - pi)/3.0 )*(x - 1)/((x - 1)^2 + (y - 1)^2), "
-                        "    1.0/3.0 * ((x - 1)^2 + (y - 1)^2)^(-2.0/3.0) * 2*(y - 1)* sin( (2.0*atan2(y - 1, x - 1) + 3.0*pi)/3.0 ) + "
-                        "    ((x - 1)^2 + (y - 1)^2)^(1.0/3.0) * 2.0/3.0*cos( (2.0*atan2(y - 1, x - 1) + 3.0*pi)/3.0 )*(x - 1)/((x - 1)^2 + (y - 1)^2) "
+                // u_t - u_xx = f
+                fExpr = "if(y > 0,(2*(sin(pi/3 - (4*atan(y/(x + (x^2 + y^2)^(1/2))))/3) - (4*y^2*sin(pi/3 - (4*atan(y/(x + (x^2 + y^2)^(1/2))))/3))/(3*(x^2 + y^2)^(1/2)*(y^2/(x + (x^2 + y^2)^(1/2))^2 + 1)*(x + (x^2 + y^2)^(1/2))) + (4*x*y*sin(pi/6 + (4*atan(y/(x + (x^2 + y^2)^(1/2))))/3))/(3*(x^2 + y^2)^(1/2)*(y^2/(x + (x^2 + y^2)^(1/2))^2 + 1)*(x + (x^2 + y^2)^(1/2)))))/(3*(x^2 + y^2)^(2/3)) + (2*x*sin(pi/6 + (4*atan(y/(x + (x^2 + y^2)^(1/2))))/3))/(3*(x^2 + y^2)^(2/3)) - (2*y*sin(pi/3 - (4*atan(y/(x + (x^2 + y^2)^(1/2))))/3))/(3*(x^2 + y^2)^(2/3)) - (8*x*(x*sin(pi/3 - (4*atan(y/(x + (x^2 + y^2)^(1/2))))/3) + y*sin(pi/6 + (4*atan(y/(x + (x^2 + y^2)^(1/2))))/3)))/(9*(x^2 + y^2)^(5/3)),"
+                        "         (2*y^2*sin((4*atan(y/(x + (x^2 + y^2)^(1/2))))/3) - 2*x^2*sin((4*atan(y/(x + (x^2 + y^2)^(1/2))))/3) + 4*x*y*cos((4*atan(y/(x + (x^2 + y^2)^(1/2))))/3))/(9*(x^2 + y^2)^(5/3)) - (2*x*cos((4*atan(y/(x + (x^2 + y^2)^(1/2))))/3))/(3*(x^2 + y^2)^(2/3)) - (2*y*sin((4*atan(y/(x + (x^2 + y^2)^(1/2))))/3))/(3*(x^2 + y^2)^(2/3)) )";
+                /*
+                fExpr = "2.0/3.0 * (x^2 + y^2)^(-2.0/3.0) * (y * sin( 2.0/3.0 * atan2(y,x) ) + x * cos( 2.0/3.0 * atan2(y,x) ) )" \
+                        "- ( " \
+                        "4.0/9.0 * (x^2 + y^2)^(-5.0/3.0) * ( (y^2 - x^2)/2.0 * sin( 2.0/3.0 * atan2(y,x) ) + x*y * cos( 2.0/3.0 * atan2(y,x) ) )" \
                         ")";
+                */
                 uDExpr = uExpr;
 
                 break;
 
             case 10:
                 uExpr = "cos(x)*exp(y)";
+                // u_t - u_xx = f
                 fExpr = "2.0*cos(x)*exp(y)";
                 uDExpr = uExpr;
 
                 break;
 
+            case 11:
+
+                uExpr = "sin( 1.0 / (0.1/pi + (x^2 + y^2)^(0.5) ) )";
+                // u_t - u_xx = f
+                fExpr = "if(y != 0 & x != 0, "
+                        "cos(1/((x^2 + y^2)^(1/2) + 4587328911378127/144115188075855872))/((x^2 + y^2)^(1/2)*((x^2 + y^2)^(1/2) + 4587328911378127/144115188075855872)^2) - (y*cos(1/((x^2 + y^2)^(1/2) + 4587328911378127/144115188075855872)))/((x^2 + y^2)^(1/2)*((x^2 + y^2)^(1/2) + 4587328911378127/144115188075855872)^2) - (2*x^2*cos(1/((x^2 + y^2)^(1/2) + 4587328911378127/144115188075855872)))/((x^2 + y^2)*((x^2 + y^2)^(1/2) + 4587328911378127/144115188075855872)^3) - (x^2*cos(1/((x^2 + y^2)^(1/2) + 4587328911378127/144115188075855872)))/((x^2 + y^2)^(3/2)*((x^2 + y^2)^(1/2) + 4587328911378127/144115188075855872)^2) + (x^2*sin(1/((x^2 + y^2)^(1/2) + 4587328911378127/144115188075855872)))/((x^2 + y^2)*((x^2 + y^2)^(1/2) + 4587328911378127/144115188075855872)^4, "
+                        "1e16)";
+                /*
+                fExpr = "if( y != 0 & x != 0, "
+                        "(1 - y) * cos( 1.0 / ( 0.1/pi + (x^2 + y^2)^(0.5)) ) * (x^2 + y^2)^(-0.5) * ( 1.0 / (0.1/pi + (x^2 + y^2)^(0.5)) )^(-2)"
+                        "+ x^2 * ( - 2 * cos( 1.0 / (0.1/pi + (x^2 + y^2)^(0.5)) ) * (x^2 + y^2)^(-1) * (1.0 / (0.1/pi + (x^2 + y^2)^(0.5)))^(-3)"
+                        "          - cos( 1.0 / (0.1/pi + (x^2 + y^2)^(0.5)) ) * (x^2 + y^2)^(-1.5) * (1.0 / (0.1/pi + (x^2 + y^2)^(0.5)))^(-2)"
+                        "          + sin( 1.0 / (0.1/pi + (x^2 + y^2)^(0.5)) ) * (x^2 + y^2)^(-1) * (1.0 / (0.1/pi + (x^2 + y^2)^(0.5)))^(-4)"
+                        "       )"
+                        ", 0.0)";
+                */
+                uDExpr = uExpr;
+
+                break;
+
+            case 12:
+                uExpr = "if( x > 0 , "
+                        "sin(x)/x*exp(y)*(sin(2*y) + 1), "
+                        "exp(y)*(sin(2*y) + 1))";
+                // u_t - u_xx = f
+                fExpr = "if( x > 0, "
+                        "(exp(y)*(sin(2*y) + 1)*(9*x^2*pi^2*sin(3*x*pi) - 2*sin(3*x*pi) + 6*x*pi*cos(3*x*pi)))/x^3 + (exp(y)*sin(3*x*pi)*(2*cos(2*y) + sin(2*y) + 1))/x, "
+                        "(2*exp(y)*(3*cos(2*y) + 2*sin(2*y) + 2))/3)";
+
+                uDExpr = uExpr;
+
+                break;
             case 13:
                 uExpr = "(1 - x)*x^2*(1 - y)*y^2*(1 - z)*z^2";
                 fExpr = "(1 - x)*x^2*(1 - y)*y^2*(2*z - 3*z^2)-("
@@ -546,6 +570,22 @@ namespace gismo {
                 // G-shape domain
                 uExpr = "cos(x)*exp(y)*10*(z - 0.5)";
                 fExpr = "1.0";
+                uDExpr = uExpr;
+
+                break;
+
+            case 15:
+                uExpr = "if( y > 0, (z^2 + z + 1) * (x^2 + y^2)^(1.0/3.0) * sin( (2.0*atan2(y,x) - pi)/3.0 ), "
+                        "           (z^2 + z + 1) * (x^2 + y^2)^(1.0/3.0) * sin( (2.0*atan2(y,x) + 3.0*pi)/3.0 ) )";
+                fExpr = "if( y > 0, (2*z + 1) * (x^2 + y^2)^(1.0/3.0) * sin( (2.0*atan2(y,x) - pi)/3.0 ), "
+                        "           (2*z + 1) * (x^2 + y^2)^(1.0/3.0) * sin( (2.0*atan2(y,x) + 3.0*pi)/3.0 ) )";
+                uDExpr = uExpr;
+
+                break;
+
+            case 16:
+                uExpr = "(x^2 - x)*(y^2 - y)*exp(-100*((x - 0.25)^2 + (y - 0.25)^2))";
+                fExpr = "2*y*exp(- 100*(x - 1/4)^2 - 100*(y - 1/4)^2)*(y - 1)*(- 20000*x^4 + 30000*x^3 - 10750*x^2 + 850*x + 49) - x*exp(- 100*(x - 1/4)^2 - 100*(y - 1/4)^2)*(x - 1)*(200*y^3 - 250*y^2 + 48*y + 1)";
                 uDExpr = uExpr;
 
                 break;
@@ -663,6 +703,37 @@ namespace gismo {
                         ")";
                 uDExpr = uExpr;
                 break;
+
+            case 31:
+                uExpr = "(x^2 - x)*(y^2 - y)*(z^2 - z)*exp(-100*((x - 0.25)^2 + (y - 0.25)^2 + (z - 0.25)^2))";
+                fExpr = "2*y*z*exp(- 100*(x - 1/4)^2 - 100*(y - 1/4)^2 - 100*(z - 1/4)^2)*(y - 1)*(z - 1)*(- 20000*x^4 + 30000*x^3 - 10750*x^2 + 850*x + 49) - x*y*exp(- 100*(x - 1/4)^2 - 100*(y - 1/4)^2 - 100*(z - 1/4)^2)*(x - 1)*(y - 1)*(200*z^3 - 250*z^2 + 48*z + 1) + 2*x*z*exp(- 100*(x - 1/4)^2 - 100*(y - 1/4)^2 - 100*(z - 1/4)^2)*(x - 1)*(z - 1)*(- 20000*y^4 + 30000*y^3 - 10750*y^2 + 850*y + 49)";
+                uDExpr = uExpr;
+                break;
+
+            case 32:
+                uExpr = "if( y > 0, (z^3 - z^2 + z + 1)*exp(-0.1*(z-3/4)^2) * (x^2 + y^2)^(1.0/3.0) * sin( (2.0*atan2(y,x) - pi)/3.0 ), "
+                        "           (z^3 - z^2 + z + 1)*exp(-0.1*(z-3/4)^2) * sin( (2.0*atan2(y,x) + 3.0*pi)/3.0 ) )";
+                fExpr = "if( y > 0, (exp(-(x - 3/4)^2/10)*(- 4*x^4 + 7*x^3 + 53*x^2 - 41*x + 23))/20 * (x^2 + y^2)^(1.0/3.0) * sin( (2.0*atan2(y,x) - pi)/3.0 ), "
+                        "           (exp(-(x - 3/4)^2/10)*(- 4*x^4 + 7*x^3 + 53*x^2 - 41*x + 23))/20 * sin( (2.0*atan2(y,x) + 3.0*pi)/3.0 ) )";
+                uDExpr = uExpr;
+                break;
+
+
+            case 33:
+                uExpr = "if( y <= 1, sin(pi*x)*(1 - y), sin(pi*x)*(-1 + y))";
+                fExpr = "if( y <= 1, -sin(pi*x)*(y*pi^2 - pi^2 + 1), "
+                        "            sin(pi*x)*(y*pi^2 - pi^2 + 1))";
+                uDExpr = uExpr;
+                break;
+
+            case 34:
+                uExpr = "if( y <= 1, sin(pi*x)*(1 - y)^(0.5), sin(pi*x)*(-1 + y)^0.5)";
+                fExpr = "if( y <= 1, -(sin(pi*x)*(2*y*pi^2 - 2*pi^2 + 1))/(2*(1 - y)^(1/2)), "
+                        "            (sin(pi*x)*(2*y*pi^2 - 2*pi^2 + 1))/(2*(y - 1)^(1/2)))";
+                uDExpr = uExpr;
+                break;
+
+
             default :
                 gsInfo << "WARNING: The data functions were prescribed.\n";
         }
@@ -676,17 +747,17 @@ namespace gismo {
                                                   real_t markingParamTheta) {
         if (save) {
             std::string folder = "space-time-example-" + util::to_string(exampleNumber)
-                                 + (this->isAdaptive ? ("-adapt-marker-" + util::to_string(adaptRefCrit)
+                                 + (isAdaptive ? ("-adapt-marker-" + util::to_string(adaptRefCrit)
                                                         + "-theta-" + util::to_string(markingParamTheta * 100)
                                                         + "-M-" + util::to_string(yBasisRefDelay)
                                                         + "-L-" + util::to_string(wBasisRefDelay))
                                                      : ("-uniform-M-" + util::to_string(yBasisRefDelay)))
                                  + "-v-" + util::to_string(vDegree)
                                  + "-y-" + util::to_string(yDegree)
-                                 + "-w-" + util::to_string(yDegree)
+                                 + "-w-" + util::to_string(wDegree)
                                  + "-total-ref-" + util::to_string(numTotalAdaptRef)
                                  + "-theta-0" //"-theta-hmin-squared" //
-                                 + "-based-on-ed"
+                                 + "-based-on-md"
                                  ;
             //+ "-based-on-eta";
             struct stat st = {0};
@@ -699,14 +770,14 @@ namespace gismo {
     template<unsigned d>
     void gsTestSpaceTimeMajorant<d>::gsLogProblemData() {
         gsInfo << "%-------------------------------------------------------------------------------------------------%\n";
-        gsInfo << "Problem statement: \n";
+        gsInfo << "Problem statement of the example # " << exampleNumber << " : \n";
         gsInfo << "%-------------------------------------------------------------------------------------------------%\n";
-        gsInfo << "u      : " << this->uExpr << "\n";
-        gsInfo << "f      : " << this->fExpr << "\n";
-        gsInfo << "domain : " << this->domainName << "\n";
-        gsInfo << "dim    : " << this->dim << "\n";
+        gsInfo << "u      : " << uExpr << "\n";
+        gsInfo << "f      : " << fExpr << "\n";
+        gsInfo << "domain : " << domainName << "\n";
+        gsInfo << "dim    : " << dim << "\n";
         gsInfo << "%-------------------------------------------------------------------------------------------------%\n";
-        if (this->isAdaptive)
+        if (isAdaptive)
             gsInfo << " Adaptive refinemnet strategy \n";
         else
             gsInfo << " Uniform refinemnet strategy \n";
@@ -735,14 +806,14 @@ namespace gismo {
     void gsTestSpaceTimeMajorant<d>::gsInitializeProblemData(gsFunctionExpr<> &uDFunc, gsFunctionExpr<> &fFunc,
                                                     gsFunctionExpr<> &uFunc,
                                                     gsBoundaryConditions<> &bcInfo) {
-        uDFunc = gsFunctionExpr<>(this->uDExpr, (int) d);
-        fFunc = gsFunctionExpr<>(this->fExpr, (int) d);
-        uFunc = gsFunctionExpr<>(this->uExpr, (int) d);
+        uDFunc = gsFunctionExpr<>(uDExpr, (int) d);
+        fFunc = gsFunctionExpr<>(fExpr, (int) d);
+        uFunc = gsFunctionExpr<>(uExpr, (int) d);
 
         //! [Set the Dirichlet Boundary Conditions]
         // constructor of gsFunctionExpr by an expression string and the domain dimension (real function)
         /*
-        for (gsMultiPatch<>::const_biterator bit = this->patches.bBegin(); bit != this->patches.bEnd(); ++bit) {
+        for (gsMultiPatch<>::const_biterator bit = patches.bBegin(); bit != patches.bEnd(); ++bit) {
             bcInfo.addCondition(*bit, condition_type::dirichlet, &uDFunc);
             gsInfo << "bit : \n" << *bit << "\n";
         }
@@ -833,8 +904,8 @@ namespace gismo {
         //const gsPiecewiseFunction<real_t> vPiece = mpW.piece(0); // Experiment of improving mEq in majorant
 
         // Initialize the BVP for the generating of the optimal y for the majorant
-        const gsDivPde<real_t> divPde(this->patches, freeBC, fFunc, vPiece);    // div(y) = f equation
-        const gsPoissonPde<> dualPde(this->patches, *pfreeBC, vPiece);          // y = grad(v)
+        const gsDivPde<real_t> divPde(patches, freeBC, fFunc, vPiece);    // div(y) = f equation
+        const gsPoissonPde<> dualPde(patches, *pfreeBC, vPiece);          // y = grad(v)
 
         // Initizlize assemblers
         gsAssembler<> divdivAssembler, dualAssembler;
@@ -850,11 +921,11 @@ namespace gismo {
         {
             #pragma omp section
             {
-                this->gsGenerateMMMatrixRhs(refCounter, dualPde, basisY, yDegree, yDOFs, dualAssembler, timeAsmblVectMassY);
+                gsGenerateMMMatrixRhs(refCounter, dualPde, basisY, yDegree, yDOFs, dualAssembler, timeAsmblVectMassY);
             }
             #pragma omp section
             {
-                this->gsGenerateDivMatrixRhs(refCounter, divPde, basisY, yDegree, yDOFs, divdivAssembler, timeAsmblDivDivY);
+                gsGenerateDivMatrixRhs(refCounter, divPde, basisY, yDegree, yDOFs, divdivAssembler, timeAsmblDivDivY);
             }
         }
         timeAsmblY[refCounter] = clock.stop();
@@ -864,7 +935,7 @@ namespace gismo {
         gsMatrix<real_t> divdivRhs = divdivAssembler.rhs();
         gsMatrix<real_t> vectmassRhs = dualAssembler.rhs();
 
-        this->gsSaveToFileDivDivMMMatrices(false, divdivM, vectmassM, refCounter, exampleNumber);
+        gsSaveToFileDivDivMMMatrices(false, divdivM, vectmassM, refCounter, exampleNumber);
 
         // initialize components related to the maj and majh
         real_t mEq(0.0), mD(0.0), maj(0.0), divmD(0.0), majh(0.0), majUpwindSq(0.0), majSq(0.0);
@@ -875,7 +946,7 @@ namespace gismo {
         real_t betaII(1.0);
 
         index_t currentSize = dualAssembler.matrix().innerSize();       // bigSize
-        index_t newSize = currentSize * (this->dim - 1) / this->dim;    // smallSize
+        index_t newSize = currentSize * (dim - 1) / dim;    // smallSize
         yVector.setZero(currentSize, 1);                                // bigVector
         gsMatrix<real_t> yVector_(newSize, 1);                          // smallVector
         //divdivAssembler.constructSolution(yVector, mpY);
@@ -893,15 +964,15 @@ namespace gismo {
         gsInfo << "---------------------------------------------------------------------------------\n";
 
 
-        if (this->withMajorant && this->withMajorantOptimization) {
+        if (withMajorant && withMajorantOptimization) {
             for (index_t i = 0; i < iterMajOpt; i++) {
                 /*
                 // old version
                 // all d blocks (including d-th zero block are sent to the solver)
                 // blocks are counter from 0 to d
-                gsSparseMatrix<real_t> yM = dualAssembler.matrix() + math::pow(this->cFriedrichs, 2) / beta * divdivAssembler.matrix();
-                gsMatrix<real_t>     yRhs = dualAssembler.rhs() - math::pow(this->cFriedrichs, 2) / beta * divdivAssembler.rhs();
-                this->gsSolveMajorantOptimalSystem(yM, yRhs, yVector, timeSolvY, refCounter, i, yDOFs,
+                gsSparseMatrix<real_t> yM = dualAssembler.matrix() + math::pow(cFriedrichs, 2) / beta * divdivAssembler.matrix();
+                gsMatrix<real_t>     yRhs = dualAssembler.rhs() - math::pow(cFriedrichs, 2) / beta * divdivAssembler.rhs();
+                gsSolveMajorantOptimalSystem(yM, yRhs, yVector, timeSolvY, refCounter, i, yDOFs,
                                                    stopcritVector);
                 */
                 // new version
@@ -910,12 +981,12 @@ namespace gismo {
                 ///*
 
                 gsSparseMatrix<real_t> yM_ = dualAssembler.matrix().block(0, 0, newSize, newSize)
-                                             + math::pow(this->cFriedrichs, 2) / beta *
+                                             + math::pow(cFriedrichs, 2) / beta *
                                                divdivAssembler.matrix().block(0, 0, newSize, newSize);
                 gsMatrix<real_t> yRhs_ = dualAssembler.rhs().block(0, 0, newSize, 1)
-                                         - math::pow(this->cFriedrichs, 2) / beta *
+                                         - math::pow(cFriedrichs, 2) / beta *
                                            divdivAssembler.rhs().block(0, 0, newSize, 1);
-                this->gsSolveMajorantOptimalSystem(yM_, yRhs_, yVector_, timeSolvY, refCounter, i, yDOFs,
+                gsSolveMajorantOptimalSystem(yM_, yRhs_, yVector_, timeSolvY, refCounter, i, yDOFs,
                                                    stopcritVector);
 
                 //gsInfo << "currentSize = " << currentSize << "\n";
@@ -927,13 +998,13 @@ namespace gismo {
                 //*/
                 /*
                 index_t currentSize = dualAssembler.matrix().innerSize();
-                index_t newSize = currentSize * (this->dim - 1) / this->dim; // oldSize
+                index_t newSize = currentSize * (dim - 1) / dim; // oldSize
                 gsInfo << "currentSize = " << currentSize << "\n";
                 gsInfo << "newSize = " << newSize << "\n";
                 gsInfo << "yDOFs[refCounter] = " << yDOFs[refCounter] << "\n";
                 */
-                yVector.resize(yDOFs[refCounter], this->dim);
-                this->gsSetYRefVector(yVector);
+                yVector.resize(yDOFs[refCounter], dim);
+                gsSetYRefVector(yVector);
                 divdivAssembler.constructSolution(yVector, mpY);
                 const gsField<real_t> y(divdivAssembler.patches(), mpY);
 
@@ -1066,8 +1137,8 @@ namespace gismo {
                 gsInfo << "time for element-wise evaluation of the majII: " << timeAsmblMajII[refCounter] << " sec.\n";
 
                 // Update beta and alpha
-                beta = this->cFriedrichs * mEq / mD;
-                betaII = this->cFriedrichs * mIIEq / mIID;
+                beta = cFriedrichs * mEq / mD;
+                betaII = cFriedrichs * mIIEq / mIID;
                 if (theta != 0.0) alpha = mEq / divmD;
 
                 majSq = math::pow(e0Vector[refCounter], 2) + (1 + beta) * math::pow(mD, 2) +
@@ -1128,35 +1199,37 @@ namespace gismo {
                 // If the ratio between m_d and mEq is more then certain threshhold, do no continue to optimize
                 if (mD / mEq >= ratioDualEq) iterMajOpt = i;
             }
-            if (!this->withMajorantOptimization) {
+            /*
+            if (!withMajorantOptimization) {
                 gsSparseMatrix<real_t> yM_ = dualAssembler.matrix().block(0, 0, newSize, newSize);
                 gsMatrix<real_t> yRhs_ = dualAssembler.rhs().block(0, 0, newSize, 1);
-                this->gsSolveMajorantOptimalSystem(yM_, yRhs_, yVector_, timeSolvY, refCounter, 0, yDOFs,
+                gsSolveMajorantOptimalSystem(yM_, yRhs_, yVector_, timeSolvY, refCounter, 0, yDOFs,
                                                    stopcritVector);
 
                 yVector.setZero(currentSize, 1);
                 yVector.block(0, 0, newSize, 1) = yVector_;
-                yVector.resize(yDOFs[refCounter], this->dim);
-                this->gsSetYRefVector(yVector);
+                yVector.resize(yDOFs[refCounter], dim);
+                gsSetYRefVector(yVector);
 
                 dualAssembler.constructSolution(yVector, mpY);
                 const gsField<real_t> y(dualAssembler.patches(), mpY);
 
             }
-            if (!this->withMajorantEquilibration) {
+            if (!withMajorantEquilibration) {
                 gsSparseMatrix<real_t> yM_ = divdivAssembler.matrix().block(0, 0, newSize, newSize);
                 gsMatrix<real_t> yRhs_ = - divdivAssembler.rhs().block(0, 0, newSize, 1);
-                this->gsSolveMajorantOptimalSystem(yM_, yRhs_, yVector_, timeSolvY, refCounter, 0, yDOFs,
+                gsSolveMajorantOptimalSystem(yM_, yRhs_, yVector_, timeSolvY, refCounter, 0, yDOFs,
                                                    stopcritVector);
 
                 yVector.setZero(currentSize, 1);
                 yVector.block(0, 0, newSize, 1) = yVector_;
 
-                yVector.resize(yDOFs[refCounter], this->dim);
-                this->gsSetYRefVector(yVector);
+                yVector.resize(yDOFs[refCounter], dim);
+                gsSetYRefVector(yVector);
                 divdivAssembler.constructSolution(yVector, mpY);
                 const gsField<real_t> y(divdivAssembler.patches(), mpY);
             }
+            */
 
         }
 
@@ -1202,7 +1275,7 @@ namespace gismo {
 
         //! [Solve System]
         // ---------------------------------------------------------------------------------------------------------- //
-        this->gsSolveKhfhSystem(spaceTimeAssemblerV, vVector, timeSolvV, refCount, stopcritVector);
+        gsSolveKhfhSystem(spaceTimeAssemblerV, vVector, timeSolvV, refCount, stopcritVector);
         //! [SolvevSystem]
 
         //! [Recover the Approximation Field]
@@ -1247,7 +1320,7 @@ namespace gismo {
 
         //! [Solve System]
         // ---------------------------------------------------------------------------------------------------------- //
-        this->gsSolveKhwhfhSystem(spaceTimeAssemblerW, wVector, timeSolvW, refCounter, stopcritVector);
+        gsSolveKhwhfhSystem(spaceTimeAssemblerW, wVector, timeSolvW, refCounter, stopcritVector);
         //! [SolvevSystem]
 
         //! [Recover the Approximation Field]
@@ -1272,18 +1345,18 @@ namespace gismo {
                          divdivMapper, 0);
         divdivMapper.finalize();
         yDOFs[refCounter] = divdivMapper.size();
-        if(this->withMajorant) {
+        if(withMajorant) {
 
             std::vector<gsDofMapper> divdivMappers(numMappers, divdivMapper);
             // Generate the sparse matrix for div(y) * div(w) = f * div(w) system
             clock.restart();
-            gsSparseSystem<> divdivSys(divdivMappers, this->dim, this->dim);
+            gsSparseSystem<> divdivSys(divdivMappers, dim, dim);
 
-            //divdivSys.reserve(basisY.at(0), divdivAssembler.options(), divPde.numRhs(), this->dim); // new function added into gsSparseSystem.h for the vector-valued systems
+            //divdivSys.reserve(basisY.at(0), divdivAssembler.options(), divPde.numRhs(), dim); // new function added into gsSparseSystem.h for the vector-valued systems
             divdivSys.reserve(basisY.at(0), divdivAssembler.options(), divPde.numRhs());          // old alternative that reserve only the space based on the scalar variable
             // TODO: figure out the optimal way to reserve
             // TODO: numToReserve is sufficient for THB splines ?
-            //real_t numToReserve = math::ipow(this->dim * (this->dim * yDegree + 1), this->dim);
+            //real_t numToReserve = math::ipow(dim * (dim * yDegree + 1), dim);
             //divdivSys.reserve(numToReserve, divPde.numRhs());                                     // reserve based on the above calculated number
             divdivAssembler.setSparseSystem(divdivSys);             // set the spare matrix for the system
             divdivAssembler.push<gsVisitorDivDivSpaceTime<real_t> >();       // push the assembling procedure
@@ -1303,7 +1376,7 @@ namespace gismo {
         int numMappers = 1;
         gsCPUStopwatch clock;
 
-        //if(this->withMajorant) {
+        //if(withMajorant) {
 
             // Initialtize Dof poissonMapper for y = grad(v) equation with free BC
             gsDofMapper dualMapper;
@@ -1312,11 +1385,11 @@ namespace gismo {
             std::vector<gsDofMapper> dualMappers(numMappers, dualMapper);
 
             clock.restart();
-            gsSparseSystem<> vectMassSys(dualMappers, this->dim, this->dim);
-            //real_t numToReserve = math::ipow(this->dim * (this->dim * yDegree + 1), this->dim);
+            gsSparseSystem<> vectMassSys(dualMappers, dim, dim);
+            //real_t numToReserve = math::ipow(dim * (dim * yDegree + 1), dim);
             //gsInfo << "numToReserve for vectMass = " << numToReserve << "\n";
             vectMassSys.reserve(basisY.at(0), dualAssembler.options(), dualPde.numRhs());
-            //vectMassSys.reserve(basisY.at(0), dualAssembler.options(), dualPde.numRhs(), this->dim);
+            //vectMassSys.reserve(basisY.at(0), dualAssembler.options(), dualPde.numRhs(), dim);
             //vectMassSys.reserve(numToReserve, dualPde.numRhs());
             dualAssembler.setSparseSystem(vectMassSys);
             dualAssembler.push<gsVisitorDualPoissonSpaceTime<real_t> >();
@@ -1349,7 +1422,7 @@ namespace gismo {
         gsInfo
                 << "\n%-------------------------------------------------------------------------------------------------%\n";
 
-        if (this->isAdaptive) gsInfo << "Adaptive refinement results: \n";
+        if (isAdaptive) gsInfo << "Adaptive refinement results: \n";
         else
             gsInfo << "Uniform refinement results: \n";
         gsInfo
@@ -1366,7 +1439,7 @@ namespace gismo {
         gsInfo << "Difference in the degrees of v and w: l = " << l << "\n";
 
 
-        if (this->isAdaptive) {
+        if (isAdaptive) {
             gsInfo << "Bulk parameter:         theta = " << markingParamTheta * 100 << " % \n";
             gsInfo << "Delay in refining of y: M     = " << yBasisRefDelay << "\n";
             gsInfo << "Delay in refining of w: L     = " << wBasisRefDelay << "\n";
@@ -1386,7 +1459,7 @@ namespace gismo {
             std::printf("%4u & %10u & %10u & %10u & %10.2e & %10.2e & %10.2e & %16.2e & %16.2e & %16.2e \\\\\n",
                         refCounter + 1,
                         vDOFs[refCounter],
-                        yDOFs[refCounter] * this->dim,
+                        yDOFs[refCounter] * dim,
                         wDOFs[refCounter],
                         timeAsmbV[refCounter],
                         timeAsmbY[refCounter], //timeAsmbDivDivY[refCounter] + timeAsmbDivDivY[refCounter],
@@ -1412,7 +1485,7 @@ namespace gismo {
             std::printf("%4u & %10u & %10u & %10u & %10.2e & %10.2e & %10.2e & %16.2e & %16.2e & %16.2e & %16.2f \\\\\n",
                         refCounter + 1,
                         vDOFs[refCounter],
-                        yDOFs[refCounter] * this->dim,
+                        yDOFs[refCounter] * dim,
                         wDOFs[refCounter],
                         timeAsmbV[refCounter],
                         timeAsmbY[refCounter], //timeAsmbDivDivY[refCounter] + timeAsmbDivDivY[refCounter],
@@ -1441,7 +1514,7 @@ namespace gismo {
             std::printf("%4u & %10u & %10u & %10u & %10.2e & %10.2e & %10.2e & %16.2e & %16.2e & %16.2e \\\\\n",
                         refCounter + 1,
                         vDOFs[refCounter],
-                        yDOFs[refCounter] * this->dim,
+                        yDOFs[refCounter] * dim,
                         wDOFs[refCounter],
                         timeAsmbV[refCounter],
                         timeAsmbY[refCounter], //timeAsmbDivDivY[refCounter] + timeAsmbDivDivY[refCounter],
@@ -1466,7 +1539,7 @@ namespace gismo {
             std::printf("%4u & %10u & %10u & %10u & %10.2e & %10.2e & %10.2e & %16.2e & %16.2e & %16.2e & %16.2f \\\\\n",
                         refCounter + 1,
                         vDOFs[refCounter],
-                        yDOFs[refCounter] * this->dim,
+                        yDOFs[refCounter] * dim,
                         wDOFs[refCounter],
                         timeAsmbV[refCounter],
                         timeAsmbY[refCounter], //timeAsmbDivDivY[refCounter] + timeAsmbDivDivY[refCounter],
@@ -1495,7 +1568,7 @@ namespace gismo {
             std::printf("%4u & %10u & %10u & %10u & %10.2e & %10.2e & %10.2e & %16.2e & %16.2e & %16.2e \\\\\n",
                         refCounter + 1,
                         vDOFs[refCounter],
-                        yDOFs[refCounter] * this->dim,
+                        yDOFs[refCounter] * dim,
                         wDOFs[refCounter],
                         timeAsmbSpaceTimeSolOperError[refCounter],
                         timeAsmbSpaceTimeDeltaxError[refCounter], //timeAsmbDivDivY[refCounter] + timeAsmbDivDivY[refCounter],
@@ -1696,7 +1769,7 @@ namespace gismo {
         gsInfo
                 << "%-------------------------------------------------------------------------------------------------%\n";
         gsInfo << "DOFs(v)   = " << vDOFs[refCounter] << "\n"
-               << "DOFs(y)   = " << yDOFs[refCounter] * this->dim << "\n"
+               << "DOFs(y)   = " << yDOFs[refCounter] * dim << "\n"
                << "DOFs(w)   = " << wDOFs[refCounter] << "\n\n";
         gsInfo //<< "min   = " << minVector[refCounter] << "\t"
                //<< "iEff(min)   = " << minVector[refCounter] / eVector[refCounter] << "\n"
@@ -1734,9 +1807,9 @@ namespace gismo {
     void gsTestSpaceTimeMajorant<d>::gsInitializeBasis(int degree,
                                               gsMultiBasis<> &multBasis,
                                               int numInitUniformRef) {
-        if (this->isAdaptive) {
+        if (isAdaptive) {
             // Copy basis from the multi-patch geometry (one per patch) for v and flux
-            gsTensorBSpline<d, real_t> *geo = dynamic_cast< gsTensorBSpline<d, real_t> * >( &(this->patches.patch(0)));
+            gsTensorBSpline<d, real_t> *geo = dynamic_cast< gsTensorBSpline<d, real_t> * >( &(patches.patch(0)));
             gsTensorBSplineBasis<d, real_t> tensorBSplineBasis = geo->basis();
 
             if (patches.basis(0).degree(0) < patches.basis(0).degree(1) && d == 2) {
@@ -1797,7 +1870,7 @@ namespace gismo {
         gsInitializeBasis(vDegree, multBasisV, numInitUniformRefV);
         gsInitializeBasis(yDegree, multBasisY, numInitUniformRefY);
         gsInitializeBasis(wDegree, multBasisW, numInitUniformRefW);
-        this->gsLogGeometryBasisData(this->patches.patch(0),
+        gsLogGeometryBasisData(patches.patch(0),
                                      vDegree, yDegree, wDegree, 1);
 
         gsInfo << "VBasis:      \n" << multBasisV.basis(0) << "\n";
@@ -1833,17 +1906,18 @@ namespace gismo {
                                              wBasisRefDelay
      */
     template<unsigned d>
-    void gsTestSpaceTimeMajorant<d>::gsExecuteRefinement(gsSpaceTimeAssembler<real_t> &spaceTimeAssemblerV,
-                                                gsMultiBasis<real_t> &thbMultBasisY, gsSpaceTimeAssembler<real_t> &spaceTimeAssemblerW,
-                                                std::vector<gsMultiBasis<> > &thbMultBasisYVector, std::vector<gsMultiBasis<> > &thbMultBasisWVector,
-                                                std::vector<real_t> &mdDistr, MarkingStrategy adaptRefCrit,
-                                                real_t markingParamTheta,
-                                                unsigned int refCounter,
-                                                unsigned int yBasisRefDelay, unsigned int wBasisRefDelay) {
+        void gsTestSpaceTimeMajorant<d>::gsExecuteRefinement(gsSpaceTimeAssembler<real_t> &spaceTimeAssemblerV,
+                                                             gsMultiBasis<real_t> &thbMultBasisY, gsSpaceTimeAssembler<real_t> &spaceTimeAssemblerW,
+                                                             std::vector<gsMultiBasis<> > &thbMultBasisYVector, std::vector<gsMultiBasis<> > &thbMultBasisWVector,
+                                                             std::vector<real_t> &mdDistr, MarkingStrategy adaptRefCrit,
+                                                             real_t markingParamTheta,
+                                                             unsigned int refCounter,
+                                                             unsigned int yBasisRefDelay,
+                                                             unsigned int wBasisRefDelay) {
 
         gsCPUStopwatch clock;
 
-        if (this->isAdaptive) {
+        if (isAdaptive) {
             // ------------------------------------------------------------------------------------------------------ //
             // Refining spaceTimeAssemblerV mesh (basis for V)
             // ------------------------------------------------------------------------------------------------------ //
@@ -1853,14 +1927,18 @@ namespace gismo {
             clock.restart();
             // Mark elements for refinement, based on the computed local indicators, the refinement-criterion and -parameter.
             gsMarkElementsForRef(mdDistr, adaptRefCrit, markingParamTheta, elMarked);
+            gsInfo << "number of marked elements: " << std::count_if(elMarked.begin(), elMarked.end(),
+                                                                     [](bool elem) {
+                                                                         return elem == true;
+                                                                     }) << "\n";
             gsInfo << "time for marking : " << clock.stop() << " sec.\n";
             //! [Marking procedure]
 
             //! [Refining procedure]
             // Refine the marked elements with a 1-ring of cells around marked elements
             clock.restart();
-            gsRefineMarkedElements(spaceTimeAssemblerV.multiBasis(), elMarked);
-            spaceTimeAssemblerV.multiBasis().repairInterfaces(this->patches.interfaces());
+            gsRefineMarkedElements(spaceTimeAssemblerV.multiBasis(), elMarked, 1);
+            spaceTimeAssemblerV.multiBasis().repairInterfaces(patches.interfaces());
             gsInfo << "time for refining the basis for v : " << clock.stop() << " sec.\n";
 
             // ------------------------------------------------------------------------------------------------------ //
@@ -1885,8 +1963,8 @@ namespace gismo {
 
             // Make the refinement and safe the new basis for y
             clock.restart();
-            gsRefineMarkedElements(thbMultBasisY, elMarked);
-            thbMultBasisY.repairInterfaces(this->patches.interfaces());
+            gsRefineMarkedElements(thbMultBasisY, elMarked, 1);
+            thbMultBasisY.repairInterfaces(patches.interfaces());
             gsInfo << "time for refining the basis for y : " << clock.stop() << " sec.\n";
 
             real_t sizeBasisYVector = thbMultBasisYVector.size();
@@ -1919,16 +1997,16 @@ namespace gismo {
 
             // Make the refinement and safe the new basis for w
             clock.restart();
-            gsRefineMarkedElements(spaceTimeAssemblerW.multiBasis(), elMarked);
-            spaceTimeAssemblerW.multiBasis().repairInterfaces(this->patches.interfaces());
+            gsRefineMarkedElements(spaceTimeAssemblerW.multiBasis(), elMarked, 1);
+            spaceTimeAssemblerW.multiBasis().repairInterfaces(patches.interfaces());
             gsInfo << "time for refining the basis for w : " << clock.stop() << " sec.\n";
 
 
             real_t sizeBasisWVector = thbMultBasisWVector.size();
             gsInfo << "sizeBasisWVector = " << sizeBasisWVector << "\n";
-            real_t lastStoredBasisWDOFs = (sizeBasisWVector <= 1) ? 0 : thbMultBasisWVector.at(sizeBasisWVector - 1).piece(0).anchors().size() / this->dim;
+            real_t lastStoredBasisWDOFs = (sizeBasisWVector <= 1) ? 0 : thbMultBasisWVector.at(sizeBasisWVector - 1).piece(0).anchors().size() / dim;
             gsInfo << "lastStoredBasisWDOFs = " << lastStoredBasisWDOFs << "\n";
-            real_t nextBasisWDOFs = spaceTimeAssemblerW.multiBasis().piece(0).anchors().size() / this->dim;
+            real_t nextBasisWDOFs = spaceTimeAssemblerW.multiBasis().piece(0).anchors().size() / dim;
             gsInfo << "nextBasisWDOFs       = " << nextBasisWDOFs << "\n";
 
             if (lastStoredBasisWDOFs < nextBasisWDOFs) {
@@ -1945,17 +2023,30 @@ namespace gismo {
                 thbMultBasisWVector.push_back(basis);
             }
                  */
-            if (refCounter < thbMultBasisWVector.size())
+            if (refCounter < thbMultBasisWVector.size()) {
+                //spaceTimeAssemblerW.initialize(spaceTimeAssemblerW.pde(), thbMultBasisWVector[refCounter]);
                 spaceTimeAssemblerW.basisUpdate(thbMultBasisWVector[refCounter]);
-            else
+            }
+            else {
+                //spaceTimeAssemblerW.initialize(spaceTimeAssemblerW.pde(), thbMultBasisWVector.at(thbMultBasisWVector.size() - 1));
                 spaceTimeAssemblerW.basisUpdate(thbMultBasisWVector.at(thbMultBasisWVector.size() - 1));
+            }
+            //spaceTimeAssemblerW.options().setInt("DirichletValues", dirichlet::l2Projection);
+            //spaceTimeAssemblerW.options().setInt("InterfaceStrategy", iFace::glue);
+
 
         } else {
             spaceTimeAssemblerV.multiBasis().uniformRefine();  // Uniform refinement of the basis for V
-            if (refCounter >= yBasisRefDelay - 1)
+            gsInfo << "refCounter" <<  refCounter << "\n";
+            gsInfo << "yBasisRefDelay" <<  yBasisRefDelay << "\n";
+            gsInfo << "wBasisRefDelay" <<  wBasisRefDelay << "\n";
+            gsInfo << "refCounter >= yBasisRefDelay - 1 ? " << (int(refCounter) >= int(yBasisRefDelay - 1)) << "\n";
+            if (int(refCounter) >= int(yBasisRefDelay - 1)) {
                 thbMultBasisY.uniformRefine();              // uniform refinement of basis of Y
-            if (refCounter >= wBasisRefDelay - 1)
+            }
+            if (int(refCounter) >= int(wBasisRefDelay - 1)) {
                 spaceTimeAssemblerW.multiBasis().uniformRefine();       // uniform refinement of basis of W
+            }
 
         }
         spaceTimeAssemblerV.refresh();
@@ -1975,23 +2066,23 @@ namespace gismo {
             // Saving Paraview files
             std::string refTag = util::to_string(exampleNumber) + "-refnum-"
                                  + util::to_string(refCounter);
-            if (this->isAdaptive){
+            if (isAdaptive){
                 gsMesh<> mesh;
-                gsTensorBSpline<d, real_t> *geo = dynamic_cast< gsTensorBSpline<d, real_t> * >( &(this->patches.patch(0)));
+                gsTensorBSpline<d, real_t> *geo = dynamic_cast< gsTensorBSpline<d, real_t> * >( &(patches.patch(0)));
                 makeMesh(basis.basis(0), mesh);
                 std::string meshParam("param-domain-mesh-" + refTag),
                         meshPhys("phys-domain-mesh-" + refTag),
                         vPhys("v-" + refTag);
 
-                gsWriteParaview(mesh, this->resultFolder + "/" + meshParam, true);
+                gsWriteParaview(mesh, resultFolder + "/" + meshParam, true);
                 geo->evaluateMesh(mesh);
-                gsWriteParaview(mesh, this->resultFolder + "/" + meshPhys, true);
-                gsWriteParaview(v, this->resultFolder + "/" + vPhys, 5001, true);
+                gsWriteParaview(mesh, resultFolder + "/" + meshPhys, true);
+                gsWriteParaview(v, resultFolder + "/" + vPhys, 5001, true);
             }
             // Saving txt files
             std::string resultsFile = "results-" + refTag + ".txt";
 
-            std::ofstream file((this->resultFolder + "/" + resultsFile).c_str());
+            std::ofstream file((resultFolder + "/" + resultsFile).c_str());
             if (!file.is_open())
                 std::cout << "Problem opening the result file!" << resultsFile << std::endl;
             else {
@@ -2029,7 +2120,7 @@ namespace gismo {
             std::string refTag = util::to_string(exampleNumber);
             std::string resultsFile = "results-" + refTag + ".txt";
 
-            std::ofstream file((this->resultFolder + "/" + resultsFile).c_str());
+            std::ofstream file((resultFolder + "/" + resultsFile).c_str());
             if (!file.is_open())
                 std::cout << "Problem opening the result file!" << resultsFile << std::endl;
             else {
@@ -2038,7 +2129,7 @@ namespace gismo {
                 file << "]; \n";
 
                 file << "yDOFs = [";
-                for (int refCounter = 0; refCounter < refTotal; ++refCounter)   file << yDOFs[refCounter] * this->dim << ", ";
+                for (int refCounter = 0; refCounter < refTotal; ++refCounter)   file << yDOFs[refCounter] * dim << ", ";
                 file << "]; \n";
 
                 file << "wDOFs = [";
@@ -2086,7 +2177,7 @@ namespace gismo {
                                                          int refCounter,
                                                          const unsigned exampleNumber) {
         {
-            //if (save && refCounter <= 3 && ! this->isAdaptive) {
+            //if (save && refCounter <= 3 && ! isAdaptive) {
             if (save && refCounter <= 3) {
                 // Saving Paraview files
                 std::string refTag = "-refnum-" \
@@ -2101,7 +2192,7 @@ namespace gismo {
                 {
 #pragma omp section
                     {
-                        std::ofstream streamDivDiv((this->resultFolder + "/" + divdivFile).c_str());
+                        std::ofstream streamDivDiv((resultFolder + "/" + divdivFile).c_str());
                         if (!streamDivDiv.is_open())
                             std::cout << "Problem opening the result file!" << divdivFile << std::endl;
                         else {
@@ -2115,7 +2206,7 @@ namespace gismo {
 #pragma omp section
                     {
 
-                        std::ofstream streamMM((this->resultFolder + "/" + mmFile).c_str());
+                        std::ofstream streamMM((resultFolder + "/" + mmFile).c_str());
                         if (!streamMM.is_open())
                             std::cout << "Problem opening the result file!" << mmFile << std::endl;
                         else {
@@ -2141,7 +2232,7 @@ namespace gismo {
                                      + util::to_string(exampleNumber);
                 // Saving txt files
                 std::string kFile = "K" + refTag + ".txt";
-                std::ofstream streamDivDiv((this->resultFolder + "/" + kFile).c_str());
+                std::ofstream streamDivDiv((resultFolder + "/" + kFile).c_str());
                 if (!streamDivDiv.is_open())
                     std::cout << "Problem opening the result file!" << kFile << std::endl;
                 else {
@@ -2176,12 +2267,12 @@ namespace gismo {
                 gsSparseSolver<>::LU solverLU;
                 solverLU.compute(assembler.matrix());
                 vVectorIter0 = solverLU.solve(assembler.rhs());
-                this->gsSetVVector(vVectorIter0);
+                gsSetVVector(vVectorIter0);
 
             } else {
 
-                vVectorIter0 = this->getVRefVector();
-                this->gsSetVVector(vVectorIter0);
+                vVectorIter0 = getVRefVector();
+                gsSetVVector(vVectorIter0);
             }
             #pragma omp parallel sections
             {
@@ -2230,7 +2321,7 @@ namespace gismo {
 
                 #pragma omp section
                 {
-                    //if (this->dim == 2) {
+                    //if (dim == 2) {
                         gsCPUStopwatch clock_2;
                         clock_2.restart();
 
@@ -2278,11 +2369,11 @@ namespace gismo {
                 gsSparseSolver<>::LU solverLU;
                 solverLU.compute(assembler.matrix());
                 wVectorIter0 = solverLU.solve(assembler.rhs());
-                //this->gsSetWVector(wVectorIter0);
+                //gsSetWVector(wVectorIter0);
 
             } else {
-                wVectorIter0 = this->getWRefVector();
-                //this->gsSetWVector(wVectorIter0);
+                wVectorIter0 = getWRefVector();
+                //gsSetWVector(wVectorIter0);
             }
             #pragma omp parallel sections
             {
@@ -2359,7 +2450,7 @@ namespace gismo {
 
                 #pragma omp section
                 {
-                    //if (this->dim == 2) {
+                    //if (dim == 2) {
                         gsCPUStopwatch clock_2;
                         clock_2.restart();
                         // DLDT is for SPD matrices - doesn't work
@@ -2417,12 +2508,12 @@ namespace gismo {
             // we are getting here the vector of the size [(N_big / d) x d]
             // N = (d - 1) / d * N_big
             // but we need only d-1 columns of it since the last dimension is zero
-            yVectorIter = (this->gsGetYRefVector()).block(0, 0, yDOFs[refCounter], this->dim-1);
+            yVectorIter = (gsGetYRefVector()).block(0, 0, yDOFs[refCounter], dim-1);
             // we resize it to work with [N x 1] vector
-            yVectorIter.resize(yDOFs[refCounter] * (this->dim - 1), 1);
+            yVectorIter.resize(yDOFs[refCounter] * (dim - 1), 1);
         }
 
-        if (this->dim == 2 || this->dim == 3) {
+        if (dim == 2 || dim == 3) {
             #pragma omp parallel sections
             {
 
@@ -2455,7 +2546,7 @@ namespace gismo {
                 }
             }
         }
-        else if (this->dim == 4)    {
+        else if (dim == 4)    {
             gsCPUStopwatch clock_2;
             clock_2.restart();
             gsConjugateGradient<> solverCG(yM, preConMat);

@@ -63,50 +63,51 @@ int main(int argc, char *argv[])
     // Define parameters of I/O
     bool plotToParaview = false; // Flag indicating whether objects must be plotted in ParaView
     bool saveToFile     = true;  // Flag indicating whether objects must be plotted in ParaView
-    bool isAdaptive     = false;
+    bool isAdaptive     = true;
     bool withMajorant   = true;
     bool withMajorantOptimization = true;
     bool withMajorantEqulibration = false;
 
     if ( !gsParseCommandLine(argc, argv, plotToParaview) ) return 0;
 
-    // Define test-case parameters
-    ///*
-    // const unsigned exampleNumber(2);        // 2 example: 2d unit square, u = (1 - x)*x*x*(1 - t)*t
-    // const unsigned exampleNumber(3);        // 3 example: 2d unit square, u = sin(pi*x)*sin(pi*t)
-    // const unsigned exampleNumber(4);        // 4 example: 2d unit square, u = sin(6.0*pi*x)*sin(3.0*pi*t)
-    // const unsigned exampleNumber(5);        // 5 example: 2d unit square, u = cos(x)*exp(t)
-    // const unsigned exampleNumber(6);        // 6 example: 2d unit square, u = (x^2 - x) * (y^2 - y) * exp(-100 * ((x - 0.8)^2 + (y - 0.05)^2))
-    // const unsigned eexampleNumber(7);        // 7 example: 2d rectangle $(0, 2) \times (0, 1)$, u = (2 - x)*x*x*(1 - y)*y
-    // const unsigned eexampleNumber(8);        // 8 example: 2d rectangle $(0, 2) \times (0, 1)$, u = (x^2 - 2*x) * (y^2 - y) * exp(-100 * ((x - 1.4)^2 + (y - 0.95)^2))
-    // const unsigned exampleNumber(22);       // 22 example: 2d unit square, u = sin(pi*x)*(1 - y)*exp(3*y)
-    // const unsigned exampleNumber(9);     // 9 example: 2d rectangle (0, 1) \times (0, 2), u = if( y > 0, (z^2 + z + 1) * (x^2 + y^2)^(1.0/3.0) * sin( (2.0*atan2(y,x) - pi)/3.0 ), (x^2+y^2)^(1.0/3.0) * sin( (2.0*atan2(y,x) + 3.0*pi)/3.0 ) )
-    // const unsigned d(2);
-    //*/
+    // Define test-case parameters (number and dimension)
+    const unsigned
+    // exampleNumber(2), d(2);        // 2 example: 2d unit square, u = (1 - x)*x*x*(1 - t)*t
+    // exampleNumber(3), d(2);        // 3 example: 2d unit square, u = sin(pi*x)*sin(pi*t)
+    // exampleNumber(4), d(2);        // 4 example: 2d unit square, u = sin(6.0*pi*x)*sin(3.0*pi*t)
+    // exampleNumber(5), d(2);        // 5 example: 2d unit square, u = cos(x)*exp(t)
+    // exampleNumber(6), d(2);        // 6 example: 2d unit square, u = (x^2 - x) * (y^2 - y) * exp(-100 * ((x - 0.8)^2 + (y - 0.05)^2))
+    // exampleNumber(7), d(2);        // 7 example: 2d rectangle $(0, 2) x (0, 1)$, u = (2 - x)*x*x*(1 - y)*y
+    // exampleNumber(8), d(2);        // 8 example: 2d rectangle $(0, 2) x (0, 1)$, u = (x^2 - 2*x) * (y^2 - y) * exp(-100 * ((x - 1.4)^2 + (y - 0.95)^2))
+    // exampleNumber(9), d(2);     // 9 example: 2d rectangle (0, 1) x (0, 2), u = (x^2 + t^2)^(1.0/3.0) * sin(2.0/3.0*atan2(t,x) + pi)
+    // exampleNumber(10), d(2);     // 10 example: 2d rectangle (0, 1) x (0, 2), u = cos(x)*exp(t)
+    // exampleNumber(11), d(2);     // 11 example: 2d unit square, u = sin(1 / (1/pi/10 + (x^2 + y^2)^(1.0/2.0)))
+    // exampleNumber(12), d(2);        // 11 example: 2d unit square, u =
+    // exampleNumber(16), d(2);       // 22 example: 2d unit square, u = (x^2 - x)*(y^2 - y)*exp(-100*((x - 0.25)^2 + (y - 0.25)^2))
+    //exampleNumber(33), d(2);       // 33 example: 2d [0, 1] x (0, 2), u = sin(pi*x)*abs(1 - y)
+    exampleNumber(34), d(2);       // 33 example: 2d [0, 1] x (0, 2), u = sin(pi*x)*abs(1 - y)^0.5
 
-    ///*
-    //const unsigned exampleNumber(13);     // 3d unit cube: u = (1 - x)*x^2*(1 - y)*y^2*(1 - z)*z^2
-    //const unsigned exampleNumber(14);     // 3d G-shape: u = cos(x)*exp(y)*10*z
-    //const unsigned exampleNumber(18);     // 3d G-shape: u = tanh(1 - (x + 2*y + 4*z - 2))
-    //const unsigned exampleNumber(19);     // 3d unit cube: u = tanh(1 - (x + 2*y + 4*z - 2))
-    //const unsigned exampleNumber(17);     // 3d unit cube: u = cos(x)*exp(y)
 
-    // modified examples:
-    //const unsigned exampleNumber(20);     // 20 example: unit cube, u = sin(pi*x)*sin(pi*y)*sin(pi*t),        non-homogeneous BC
-    //const unsigned exampleNumber(25);     // 25 example: unit cube, u = (1 - x)*x^2*(1 - y)*y^2*(1 - z)*z^2,  homogeneous BC
-    //const unsigned exampleNumber(21);       // 21 example: unit cube, u = cos(x)*exp(y)*sin(pi*t),              non-homogeneous BC
-    // const unsigned exampleNumber(23);     // 23 example: 2d+1 quater annulus + [0, 1] in time, u = (1 - x)*x^2*(1 - y)*y^2*(1 - z)*z^2
-    //const unsigned exampleNumber(24);     // 24 example: 2d+1 quater annulus + [0, 1] in time, u = sin(pi*x)*sin(pi*y)*sin(pi*z)
-    //const unsigned exampleNumber(26);       // 26 example: 2d+1 quater annulus + [0, 1] in time, u = (1 - x)*x^2*(1 - y)*y^2*(1 - z)*z^2
-    const unsigned exampleNumber(27);     // 27 example: square x [0, 2], u = (1 - x)*x^2*(1 - y)*y^2*(2 - z)*z^2,  homogeneous BC
-    //const unsigned exampleNumber(28);     // 28 example: [0, 2] x [0, 1] x [0, 1], u = (2 - x)*x^2*(1 - y)*y^2*(1 - z)*z^2,  homogeneous BC
-    //const unsigned exampleNumber(29);      // 29 example: [0, 2] x [0, 3] x [0, 1], u = (2 - x)*x^2*(3 - y)*y^2*(1 - z)*z^2,  homogeneous BC
-    //const unsigned exampleNumber(30);      // 30 example: 2d+1 quater annulus + [0, 1] in time, u = (x^2 + y^2 - 1)*(x^2 + y^2 - 4)*(1 - z)*z^2,  homogeneous BC
-    //const unsigned exampleNumber(31);      // 30 example: G-domain + [0, 1] in time, u = (x^2 + y^2 - 1)*(x^2 + y^2 - 4)*exp(-100 * ((z - 0.8)^2)),  homogeneous BC
-    //const unsigned exampleNumber(11);     // 11 example: 2d l-shape, u = if( y > 0, (z^2 + z + 1) *(x^2 + y^2)^(1.0/3.0) * sin( (2.0*atan2(y,x) - pi)/3.0 ), (x^2+y^2)^(1.0/3.0) * sin( (2.0*atan2(y,x) + 3.0*pi)/3.0 ) )
-    //const unsigned exampleNumber(12);     // 12 example: 2d l-shape, u = if( y > 0, (z^2 + z + 1) *(x^2 + y^2)^(1.0/3.0) * sin( (2.0*atan2(y,x) - pi)/3.0 ), (x^2+y^2)^(1.0/3.0) * sin( (2.0*atan2(y,x) + 3.0*pi)/3.0 ) )
-    const unsigned d(3);    // Dimension must be prescribed
-    //*/
+    // 3d examples:
+    // exampleNumber(20), d(3);     // 20 example: unit cube, u = sin(pi*x)*sin(pi*y)*sin(pi*t),        non-homogeneous BC
+    // exampleNumber(25), d(3);     // 25 example: unit cube, u = (1 - x)*x^2*(1 - y)*y^2*(1 - z)*z^2,  homogeneous BC
+    // exampleNumber(21), d(3);       // 21 example: unit cube, u = cos(x)*exp(y)*sin(pi*t),              non-homogeneous BC
+    // exampleNumber(23), d(3);     // 23 example: 2d+1 quater annulus + [0, 1] in time, u = (1 - x)*x^2*(1 - y)*y^2*(1 - z)*z^2
+    // exampleNumber(24), d(3);     // 24 example: 2d+1 quater annulus + [0, 1] in time, u = sin(pi*x)*sin(pi*y)*sin(pi*z)
+    // exampleNumber(26), d(3);       // 26 example: 2d+1 quater annulus + [0, 1] in time, u = (1 - x)*x^2*(1 - y)*y^2*(1 - z)*z^2
+    // exampleNumber(27), d(3);     // 27 example: square x [0, 2], u = (1 - x)*x^2*(1 - y)*y^2*(2 - z)*z^2,  homogeneous BC
+    // exampleNumber(28), d(3);     // 28 example: [0, 2] x [0, 1] x [0, 1], u = (2 - x)*x^2*(1 - y)*y^2*(1 - z)*z^2,  homogeneous BC
+    // exampleNumber(29), d(3);      // 29 example: [0, 2] x [0, 3] x [0, 1], u = (2 - x)*x^2*(3 - y)*y^2*(1 - z)*z^2,  homogeneous BC
+    // exampleNumber(30), d(3);      // 30 example: 2d+1 quater annulus + [0, 1] in time, u = (x^2 + y^2 - 1)*(x^2 + y^2 - 4)*(1 - z)*z^2,  homogeneous BC
+    // exampleNumber(31), d(3);      // 30 example: G-domain + [0, 1] in time, u = (x^2 + y^2 - 1)*(x^2 + y^2 - 4)*exp(-100 * ((z - 0.8)^2)),  homogeneous BC
+    // exampleNumber(15), d(3);     // 15 example: 3d l-shape x (0, 2), u = if( y > 0, (z^2 + z + 1) *(x^2 + y^2)^(1.0/3.0) * sin( (2.0*atan2(y,x) - pi)/3.0 ), (x^2+y^2)^(1.0/3.0) * sin( (2.0*atan2(y,x) + 3.0*pi)/3.0 ) )
+    // exampleNumber(31), d(3);     // 31 example: 3d unit cube, (x^2 - x)*(y^2 - y)*(z^2 - z)*exp(-100*((x - 0.25)^2 + (y - 0.25)^2 + (z - 0.25)^2))
+    // exampleNumber(32), d(3);     // 32 example: 3d unit square + [0, 2] in time, u = if( y > 0, (z^2 + z + 1) * (x^2 + y^2)^(1.0/3.0) * sin( (2.0*atan2(y,x) - pi)/3.0 ),
+    //                                                                                            (z^2 + z + 1) * (x^2+y^2)^(1.0/3.0) * sin( (2.0*atan2(y,x) + 3.0*pi)/3.0 ) )
+
+    // Define test-case dimentions
+    //const unsigned d(2);
+    //const unsigned d(3);    // Dimension must be prescribed
 
     gsTestSpaceTimeMajorant<d> testSpaceTime(exampleNumber,
                                              isAdaptive,
@@ -114,7 +115,7 @@ int main(int argc, char *argv[])
                                              withMajorantEqulibration);
 
     // Init the degree of basis S^{p, p}, where p = vDegree
-    int vDegree(2), m(2), l(2);
+    int vDegree(2), m(3), l(3);
     // Init the degree of the basis for the flux: y \in S^{p + k, p + k} + S^{p + k, p + k}, p = vDegree
     // yDegree must be >= 2 to ensure that S^{p + k, p + k} + S^{p + k, p + k} \subset H(\Omega, div§)
     int yDegree(vDegree + m);
@@ -122,13 +123,13 @@ int main(int argc, char *argv[])
 
     // Setting up the refinement strategy
     // Number of initial uniform and total unif./adapt. refinement steps
-    unsigned int numInitUniformRefV(1), numInitUniformRefY(1), numInitUniformRefW(1), numTotalAdaptRef(8);
+    unsigned int numInitUniformRefV(2), numInitUniformRefY(2), numInitUniformRefW(2), numTotalAdaptRef(8);
 
     MarkingStrategy adaptRefCrit(BULK); // with alternatives GARU, PUCA, and BULK
     //MarkingStrategy adaptRefCrit(GARU);
-    real_t markingParamTheta(0.6);  // parameter theta in marking strategy
-    unsigned int yBasisRefDelay(7); // parameter for the delay in updating y_h basis for the refinement
-    unsigned int wBasisRefDelay(7); // parameter for the delay in updating w-h basis for the refinement
+    real_t markingParamTheta(0.4);  // parameter theta in marking strategy
+    unsigned int yBasisRefDelay(0); // parameter for the delay in updating y_h basis for the refinement
+    unsigned int wBasisRefDelay(0); // parameter for the delay in updating w-h basis for the refinement
 
     testSpaceTime.gsCreateResultsFolder(saveToFile, exampleNumber,
                                         vDegree, yDegree, wDegree, yBasisRefDelay, wBasisRefDelay,
@@ -255,7 +256,7 @@ int main(int argc, char *argv[])
     //! [Define Auxiliary Structures to Store the Results]
     gsPoissonPde<> heatPde(testSpaceTime.patches, bcInfo, fFunc);
 
-    real_t theta = 1e-3;
+    real_t theta = 1;
     gsFunctionExpr<real_t> thetaFunc(std::to_string(theta), testSpaceTime.dim);
 
     gsSpaceTimeAssembler<real_t> spaceTimeAssemblerV;
@@ -263,7 +264,7 @@ int main(int argc, char *argv[])
         spaceTimeAssemblerV = gsSpaceTimeAssembler<real_t>(testSpaceTime.patches, basisV, bcInfo, *heatPde.rhs(), thetaFunc);
     //else
     //    spaceTimeAssemblerV = gsSpaceTimeAssembler<real_t>(testSpaceTime.patches, basisV, bcInfo, *heatPde.rhs());
-
+    //spaceTimeAssemblerV.initialize(heatPde, basisV);
     spaceTimeAssemblerV.options().setInt("DirichletValues", dirichlet::l2Projection);
     spaceTimeAssemblerV.options().setInt("InterfaceStrategy", iFace::glue);
 
@@ -272,7 +273,7 @@ int main(int argc, char *argv[])
         spaceTimeAssemblerW = gsSpaceTimeAssembler<real_t>(testSpaceTime.patches, basisW, bcInfo, *heatPde.rhs(), thetaFunc);
     //else
     //    spaceTimeAssemblerW = gsSpaceTimeAssembler<real_t>(testSpaceTime.patches, basisW, *bcInfoP, *heaPdeRhsP);
-
+    //spaceTimeAssemblerW.initialize(heatPde, basisW);
     spaceTimeAssemblerW.options().setInt("DirichletValues", dirichlet::l2Projection);
     spaceTimeAssemblerW.options().setInt("InterfaceStrategy", iFace::glue);
 
@@ -628,10 +629,11 @@ int main(int argc, char *argv[])
         if (refCount < numTotalAdaptRef - 1) {
             testSpaceTime.gsExecuteRefinement(spaceTimeAssemblerV,
                                              basisY, spaceTimeAssemblerW,
-                                             basisYVector, basisWVector, eSpaceTimeDistr, //eSpaceTimeDistr, mdDistr, //mIIdDistr, // eIdentDistr, //eSpaceTimeSolOperDistr, //eH1Distr, //mdDistr, //eSpaceTimeDistr, //eSpaceTimeSolOperDistr, //eH1Distr, //eIdentDistr, //mdDistr,
+                                             basisYVector, basisWVector, mdDistr, //mdDistr, mdDistr, //mIIdDistr, // eIdentDistr, //eSpaceTimeSolOperDistr, //eH1Distr, //mdDistr, //eSpaceTimeDistr, //eSpaceTimeSolOperDistr, //eH1Distr, //eIdentDistr, //mdDistr,
                                              adaptRefCrit,
                                              markingParamTheta,
-                                             refCount, yBasisRefDelay,
+                                             refCount,
+                                             yBasisRefDelay,
                                              wBasisRefDelay);
             //spaceTimeAssemblerV.refresh();
             //spaceTimeAssemblerW.refresh();

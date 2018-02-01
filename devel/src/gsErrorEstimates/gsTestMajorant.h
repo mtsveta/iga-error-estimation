@@ -538,7 +538,8 @@ namespace gismo {
                                                                    gsVector<index_t> &yDOFs,
                                                                    const gsMultiPatch<real_t> &mpV, const gsField<> &v,
                                                                    gsVector<real_t> &stopcritVector,
-                                                                   const gsFunctionExpr<real_t> &fFunc, real_t fL2NormSq,
+                                                                   const gsFunctionExpr<real_t> &fFunc,
+                                                                   real_t fL2NormSq,
                                                                    gsVector<double> &timeAsmblDivDivY,
                                                                    gsVector<double> &timeAsmblVectMassY,
                                                                    gsVector<double> &timeAsmblY,
@@ -558,10 +559,12 @@ namespace gismo {
         gsCPUStopwatch clock_, clock;
 
         gsBoundaryConditions<> freeBC;
+        gsBoundaryConditions<> * pfreeBC = new gsBoundaryConditions<>(freeBC);  // get a deep copy of the free BC
+
         gsPoissonPde<> divPde(this->patches, freeBC, fFunc);
         divdivAssembler.initialize(divPde, basisY);
 
-        gsPoissonPde<> dualPde(this->patches, freeBC, mpV.piece(0));
+        gsPoissonPde<> dualPde(this->patches, * pfreeBC, mpV.piece(0));
         dualAssembler.initialize(dualPde, basisY);
 
         this->gsGenerateDivDivMMMatrices(refCounter, divPde, dualPde,
@@ -823,8 +826,6 @@ namespace gismo {
     }
 
 
-
-
     template<unsigned d>
     void gsTestMajorant<d>::gsRecontructMinorantBasedOnAuxiliaryW(int refCounter, gsPoissonAssembler<real_t>& poissonAssemblerW, gsBoundaryConditions<> &bcInfo,
                                                                    gsMatrix<real_t> &wVector, gsMultiPatch<real_t> &mpW, gsField<>& w, gsVector<index_t> &wDOFs,
@@ -950,12 +951,20 @@ namespace gismo {
                                              int m, int l,
                                              int yBasisRefDelay, int wBasisRefDelay,
                                              real_t markingParamTheta, int numInitUniformRef, int numTotalAdaptRef,
-                                             gsVector<index_t> &vDOFs, gsVector<index_t> &yDOFs, gsVector<index_t> &wDOFs,
-                                             gsVector<double> &timeAsmbV, gsVector<double> &timeAsmbDivDivY, gsVector<double> &timeAsmbMMY, gsVector<double> &timeAsmbY, gsVector<double> &timeAsmbW,
-                                             gsMatrix<double> &timeSolvV, gsMatrix<double> &timeSolvY, gsMatrix<double> &timeSolvW,
-                                             gsVector<double> &timeAsmbError, gsVector<double> &timeAsmbMajorant, gsVector<double> &timeAsmbMinorant, gsVector<double> &timeAsmbEtaIndicator,
-                                             gsVector<real_t> &eVector, gsVector<real_t> &relErrorVector, gsVector<real_t> &relError0Vector,
-                                             gsVector<real_t> &majVector, gsVector<real_t> &mdVector, gsVector<real_t> &meqVector, gsVector<real_t> &minVector, gsVector<real_t> &etaVector) {
+                                             gsVector<index_t> &vDOFs, gsVector<index_t> &yDOFs,
+                                             gsVector<index_t> &wDOFs,
+                                             gsVector<double> &timeAsmbV, gsVector<double> &timeAsmbDivDivY,
+                                             gsVector<double> &timeAsmbMMY, gsVector<double> &timeAsmbY,
+                                             gsVector<double> &timeAsmbW,
+                                             gsMatrix<double> &timeSolvV, gsMatrix<double> &timeSolvY,
+                                             gsMatrix<double> &timeSolvW,
+                                             gsVector<double> &timeAsmbError, gsVector<double> &timeAsmbMajorant,
+                                             gsVector<double> &timeAsmbMinorant, gsVector<double> &timeAsmbEtaIndicator,
+                                             gsVector<real_t> &eVector, gsVector<real_t> &relErrorVector,
+                                             gsVector<real_t> &relError0Vector,
+                                             gsVector<real_t> &majVector, gsVector<real_t> &mdVector,
+                                             gsVector<real_t> &meqVector, gsVector<real_t> &minVector,
+                                             gsVector<real_t> &etaVector) {
         gsInfo
                 << "\n%-------------------------------------------------------------------------------------------------%\n";
 
@@ -1222,18 +1231,12 @@ namespace gismo {
                 << "%-------------------------------------------------------------------------------------------------%\n";
     }
 
-    /*
-     * poissonAssembler, basisY, basisW, basisYVector, basisWVector,
-     * mdDistr,
-                                             adaptRefCrit,
-                                             markingParamTheta,
-                                             refCounter, yBasisRefDelay,
-                                             wBasisRefDelay
-     */
     template<unsigned d>
     void gsTestMajorant<d>::gsExecuteRefinement(gsPoissonAssembler<real_t> &poissonAssembler,
-                                                gsMultiBasis<real_t> &thbMultBasisY, gsPoissonAssembler<real_t> &poissonAssemblerW,
-                                                std::vector<gsMultiBasis<> > &thbMultBasisYVector, std::vector<gsMultiBasis<> > &thbMultBasisWVector,
+                                                gsMultiBasis<real_t> &thbMultBasisY,
+                                                gsPoissonAssembler<real_t> &poissonAssemblerW,
+                                                std::vector<gsMultiBasis<> > &thbMultBasisYVector,
+                                                std::vector<gsMultiBasis<> > &thbMultBasisWVector,
                                                 std::vector<real_t> &mdDistr, MarkingStrategy adaptRefCrit,
                                                 real_t markingParamTheta,
                                                 int refCounter,
@@ -1251,13 +1254,17 @@ namespace gismo {
             clock.restart();
             // Mark elements for refinement, based on the computed local indicators, the refinement-criterion and -parameter.
             gsMarkElementsForRef(mdDistr, adaptRefCrit, markingParamTheta, elMarked);
+            gsInfo << "number of marked elements: " << std::count_if(elMarked.begin(), elMarked.end(),
+                                                                     [](bool elem) {
+                                                                         return elem == true;
+                                                                     }) << "\n";
             gsInfo << "time for marking : " << clock.stop() << " sec.\n";
             //! [Marking procedure]
 
             //! [Refining procedure]
-            // Refine the marked elements with a 1-ring of cells around marked elements
             clock.restart();
-            gsRefineMarkedElements(poissonAssembler.multiBasis(), elMarked);
+            // Refine the marked elements with a 1-ring of cells around marked elements
+            gsRefineMarkedElements(poissonAssembler.multiBasis(), elMarked, 1);
             poissonAssembler.multiBasis().repairInterfaces(this->patches.interfaces());
             gsInfo << "time for refining the basis for v : " << clock.stop() << " sec.\n";
 
@@ -1268,11 +1275,12 @@ namespace gismo {
                 // Refinement with optimization of the effort
                 for (int j = 0; j < yBasisRefDelay; j++) {
                     // First save the currect basis
-                    thbMultBasisYVector.push_back(thbMultBasisY);
+                    gsMultiBasis<> &basis = thbMultBasisY;
+                    thbMultBasisYVector.push_back(basis);
                 }
                 // Refinement with optimization of the effort
                 for (int j = 0; j < wBasisRefDelay; j++) {
-                    gsMultiBasis<>& basis = poissonAssemblerW.multiBasis();
+                    gsMultiBasis<> &basis = poissonAssemblerW.multiBasis();
                     thbMultBasisWVector.push_back(basis);
                 }
 
@@ -1282,24 +1290,37 @@ namespace gismo {
             // ------------------------------------------------------------------------------------------------------ //
             // Make the refinement and safe the new basis for y
             clock.restart();
-            gsRefineMarkedElements(thbMultBasisY, elMarked);
+            // Refine the marked elements with a 1-ring of cells around marked elements
+            gsRefineMarkedElements(thbMultBasisY, elMarked, 1);
             thbMultBasisY.repairInterfaces(this->patches.interfaces());
             gsInfo << "time for refining the basis for y : " << clock.stop() << " sec.\n";
-            if (refCounter >= yBasisRefDelay) thbMultBasisYVector.push_back(thbMultBasisY);
+            if (refCounter >= yBasisRefDelay) {
+                gsMultiBasis<> &basis = thbMultBasisY;
+                thbMultBasisYVector.push_back(basis);
+            }
             thbMultBasisY = thbMultBasisYVector[refCounter];
 
+            gsInfo << "thbMultBasisY stored: \n\n";
+            for (unsigned int i = 0; i < thbMultBasisYVector.size(); i++)
+                gsInfo << "thbMultBasisY info: " << thbMultBasisYVector.at(i).basis(0) << "\n";
+
+            // ------------------------------------------------------------------------------------------------------ //
+            // Refining basis for W
+            // ------------------------------------------------------------------------------------------------------ //
             // Make the refinement and safe the new basis for w
             clock.restart();
-            gsRefineMarkedElements(poissonAssemblerW.multiBasis(), elMarked);
+            // Refine the marked elements with a 1-ring of cells around marked elements
+            gsRefineMarkedElements(poissonAssemblerW.multiBasis(), elMarked, 1);
             poissonAssemblerW.multiBasis().repairInterfaces(this->patches.interfaces());
             gsInfo << "time for refining the basis for w : " << clock.stop() << " sec.\n";
             if (refCounter >= wBasisRefDelay) {
                 gsMultiBasis<>& basis = poissonAssemblerW.multiBasis();
                 thbMultBasisWVector.push_back(basis);
             }
-            //poissonAssemblerW.basisUpdate(thbMultBasisWVector[refCounter]);
-            //poissonAssemblerW.options().setInt("DirichletValues", dirichlet::l2Projection);
-            poissonAssemblerW.initialize(poissonAssemblerW.pde(), thbMultBasisWVector[refCounter], poissonAssemblerW.options());
+            poissonAssemblerW.initialize(poissonAssemblerW.pde(), thbMultBasisWVector[refCounter],
+                                         poissonAssemblerW.options());
+            poissonAssemblerW.options().setInt("DirichletValues", dirichlet::l2Projection);
+
 
         } else {
             poissonAssembler.multiBasis().uniformRefine();  // Uniform refinement of the basis for V
@@ -1367,7 +1388,10 @@ namespace gismo {
     template<unsigned d>
     void gsTestMajorant<d>::gsSaveToFileTestResults(bool save,
                                                     gsVector<index_t> &vDOFs, gsVector<index_t> &yDOFs, gsVector<index_t> &wDOFs,
-                                                    gsVector<real_t> &eVector, gsVector<real_t> &majVector, gsVector<real_t> &minVector, gsVector<real_t> &etaVector,
+                                                    gsVector<real_t> &eVector,
+                                                    gsVector<real_t> &majVector,
+                                                    gsVector<real_t> &minVector,
+                                                    gsVector<real_t> &etaVector,
                                                     int refTotal) {
 
         if (save) {
