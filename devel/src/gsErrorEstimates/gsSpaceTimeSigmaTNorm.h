@@ -47,17 +47,14 @@ public:
     T compute(bool storeElWise = false)
     {
 
-        m_value = 0.0;
-
         m_value = T(0.0);
+
         side = * m_sides.begin(); // get the side from the vector of m_sides
 
         for (typename gsMultiPatch<T>::const_biterator bit =
                 patchesPtr->bBegin(); bit != patchesPtr->bEnd(); ++bit){
             if (bit->side() == side) {
-
-                //gsInfo << "side : " << side << "\n";
-                side = bit->side();
+side = bit->side();
                 this->apply1(*this, storeElWise, bit->patch, side);
             }
 

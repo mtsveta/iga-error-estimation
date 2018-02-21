@@ -15,7 +15,7 @@
 #pragma once
 
 #include <gsPde/gsPoissonHeterogeneousPde.h>
-#include <gsErrorEstimates/gsVisitorLocalisedSpaceTime.h>
+#include <gsErrorEstimates/gsVisitorSpaceTimeLocalised.h>
 #include <gsAssembler/gsVisitorNeumann.h>
 
 namespace gismo
@@ -106,12 +106,6 @@ namespace gismo
         void basisUpdate(const gsMultiBasis<T> & bases){
             m_bases.clear();
             m_bases.push_back(bases);
-        }
-
-        void thetaUpdate(const gsFunctionExpr<real_t> & f, const gsFunctionExpr<real_t> & theta){
-            typename gsPde<T>::Ptr updatedPde( new gsPoissonHeterogeneousPde<T>(m_pde_ptr->patches(), m_pde_ptr->bc(), f, theta));
-            m_pde_ptr.reset();
-            m_pde_ptr = updatedPde;
         }
 
     protected:

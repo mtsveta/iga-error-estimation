@@ -117,10 +117,11 @@ namespace gismo
                 Rows f2dersSpace = f2ders.topRows(d-1);
                 Rows f2dersTime =  f2ders.bottomRows(1);
 
-                const T weight = quWeights[k] *  geoEval.measure(k);
+                T weight = quWeights[k] *  geoEval.measure(k);
                 T h_K = element.getCellSize();
-                T C = 1;
-                T theta_K = C * h_K;
+                T C_invK = 1;
+                T theta_K = d * math::pow(C_invK, -2) * h_K;
+
                 T delta_K = theta_K * h_K;
 
                 // f2ders : N X 1
