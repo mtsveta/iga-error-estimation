@@ -65,14 +65,14 @@ int main(int argc, char *argv[])
     bool saveToFile     = true;  // Flag indicating whether objects must be plotted in ParaView
     bool isAdaptive     = true;
     bool withMajorant   = true;
-    bool withMajorantOptimization = true;
-    bool withMajorantEqulibration = false;
+    bool withMajorantOptimization = false;
+    bool withMajorantEquilibration = true;
 
     if ( !gsParseCommandLine(argc, argv, plotToParaview) ) return 0;
 
     // Define test-case parameters (number and dimension)
     const unsigned
-    // exampleNumber(2), d(2);        // 2 example: 2d unit square, u = (1 - x)*x*x*(1 - t)*t
+    exampleNumber(2), d(2);        // 2 example: 2d unit square, u = (1 - x)*x*x*(1 - t)*t
     // exampleNumber(3), d(2);        // 3 example: 2d unit square, u = sin(pi*x)*sin(pi*t)
     // exampleNumber(4), d(2);        // 4 example: 2d unit square, u = sin(6.0*pi*x)*sin(3.0*pi*t)
     // exampleNumber(5), d(2);        // 5 example: 2d unit square, u = cos(x)*exp(t)
@@ -84,9 +84,11 @@ int main(int argc, char *argv[])
     // exampleNumber(11), d(2);     // 11 example: 2d unit square, u = sin(1 / (1/pi/10 + (x^2 + y^2)^(1.0/2.0)))
     // exampleNumber(12), d(2);        // 11 example: 2d unit square, u =
     // exampleNumber(16), d(2);       // 22 example: 2d unit square, u = (x^2 - x)*(y^2 - y)*exp(-100*((x - 0.25)^2 + (y - 0.25)^2))
-    //exampleNumber(33), d(2);       // 33 example: 2d [0, 1] x (0, 2), u = sin(pi*x)*abs(1 - y)
-    exampleNumber(34), d(2);       // 33 example: 2d [0, 1] x (0, 2), u = sin(pi*x)*abs(1 - y)^0.5
-
+    // exampleNumber(33), d(2);       // 33 example: 2d [0, 1] x (0, 2), u = sin(pi*x)*abs(1 - y)
+    // exampleNumber(34), d(2);       // 34 example: 2d [0, 1] x (0, 2), u = sin(pi*x)*abs(1 - y)^0.5
+    // exampleNumber(35), d(2);        // 35 example: 2d [0, 1] x (0, 2), u = sin(pi*x)*abs(1 - y)^1.5
+    // exampleNumber(37), d(2);
+    // exampleNumber(38), d(2);
 
     // 3d examples:
     // exampleNumber(20), d(3);     // 20 example: unit cube, u = sin(pi*x)*sin(pi*y)*sin(pi*t),        non-homogeneous BC
@@ -100,10 +102,10 @@ int main(int argc, char *argv[])
     // exampleNumber(29), d(3);      // 29 example: [0, 2] x [0, 3] x [0, 1], u = (2 - x)*x^2*(3 - y)*y^2*(1 - z)*z^2,  homogeneous BC
     // exampleNumber(30), d(3);      // 30 example: 2d+1 quater annulus + [0, 1] in time, u = (x^2 + y^2 - 1)*(x^2 + y^2 - 4)*(1 - z)*z^2,  homogeneous BC
     // exampleNumber(31), d(3);      // 30 example: G-domain + [0, 1] in time, u = (x^2 + y^2 - 1)*(x^2 + y^2 - 4)*exp(-100 * ((z - 0.8)^2)),  homogeneous BC
-    // exampleNumber(15), d(3);     // 15 example: 3d l-shape x (0, 2), u = if( y > 0, (z^2 + z + 1) *(x^2 + y^2)^(1.0/3.0) * sin( (2.0*atan2(y,x) - pi)/3.0 ), (x^2+y^2)^(1.0/3.0) * sin( (2.0*atan2(y,x) + 3.0*pi)/3.0 ) )
+    // exampleNumber(15), d(3);     // 15 example: 3d l-shape x (0, 2), u = if( y > 0, (z^2 + z + 1) * (x^2 + y^2)^(1.0/3.0) * sin( (2.0*atan2(y,x) - pi)/3.0 ), (x^2+y^2)^(1.0/3.0) * sin( (2.0*atan2(y,x) + 3.0*pi)/3.0 ) )
     // exampleNumber(31), d(3);     // 31 example: 3d unit cube, (x^2 - x)*(y^2 - y)*(z^2 - z)*exp(-100*((x - 0.25)^2 + (y - 0.25)^2 + (z - 0.25)^2))
-    // exampleNumber(32), d(3);     // 32 example: 3d unit square + [0, 2] in time, u = if( y > 0, (z^2 + z + 1) * (x^2 + y^2)^(1.0/3.0) * sin( (2.0*atan2(y,x) - pi)/3.0 ),
-    //                                                                                            (z^2 + z + 1) * (x^2+y^2)^(1.0/3.0) * sin( (2.0*atan2(y,x) + 3.0*pi)/3.0 ) )
+    // exampleNumber(32), d(3);     // 32 example: 3d, unit square + [0, 2] in time, u = if( y > 0, (z^2 + z + 1) * (x^2 + y^2)^(1.0/3.0) * sin( (2.0*atan2(y,x) - pi)/3.0 ), (z^2 + z + 1) * (x^2 + y^2)^(1.0/3.0) * sin( (2.0*atan2(y,x) + 3.0*pi)/3.0 ) )
+    // exampleNumber(36), d(3);     // 32 example: 3d, unit square + [0, 2] in time, u = if( y > 0, (z^2 + z + 1) * (x^2 + y^2)^(1.0/3.0) * sin( (2.0*atan2(y,x) - pi)/3.0 ), (z^2 + z + 1) * (x^2 + y^2)^(1.0/3.0) * sin( (2.0*atan2(y,x) + 3.0*pi)/3.0 ) )
 
     // Define test-case dimentions
     //const unsigned d(2);
@@ -112,10 +114,10 @@ int main(int argc, char *argv[])
     gsTestSpaceTimeMajorant<d> testSpaceTime(exampleNumber,
                                              isAdaptive,
                                              withMajorant, withMajorantOptimization,
-                                             withMajorantEqulibration);
+                                             withMajorantEquilibration);
 
     // Init the degree of basis S^{p, p}, where p = vDegree
-    int vDegree(2), m(3), l(3);
+    int vDegree(2), m(1), l(1);
     // Init the degree of the basis for the flux: y \in S^{p + k, p + k} + S^{p + k, p + k}, p = vDegree
     // yDegree must be >= 2 to ensure that S^{p + k, p + k} + S^{p + k, p + k} \subset H(\Omega, div§)
     int yDegree(vDegree + m);
@@ -123,13 +125,13 @@ int main(int argc, char *argv[])
 
     // Setting up the refinement strategy
     // Number of initial uniform and total unif./adapt. refinement steps
-    unsigned int numInitUniformRefV(2), numInitUniformRefY(2), numInitUniformRefW(2), numTotalAdaptRef(8);
+    unsigned int numInitUniformRefV(1), numInitUniformRefY(1), numInitUniformRefW(1), numTotalAdaptRef(8);
 
     MarkingStrategy adaptRefCrit(BULK); // with alternatives GARU, PUCA, and BULK
     //MarkingStrategy adaptRefCrit(GARU);
     real_t markingParamTheta(0.4);  // parameter theta in marking strategy
-    unsigned int yBasisRefDelay(0); // parameter for the delay in updating y_h basis for the refinement
-    unsigned int wBasisRefDelay(0); // parameter for the delay in updating w-h basis for the refinement
+    unsigned int yBasisRefDelay(5); // parameter for the delay in updating y_h basis for the refinement
+    unsigned int wBasisRefDelay(5); // parameter for the delay in updating w-h basis for the refinement
 
     testSpaceTime.gsCreateResultsFolder(saveToFile, exampleNumber,
                                         vDegree, yDegree, wDegree, yBasisRefDelay, wBasisRefDelay,
@@ -312,9 +314,6 @@ int main(int argc, char *argv[])
         solutionFieldVector.push_back(v);
         solutionMPVector.push_back(mpV);
 
-        std::string vPhys("v-init");
-        gsWriteParaview(v, vPhys, 5001, true);
-
         //! [Error, Majorant (Optimal Flux), and Residual Estimate Computation]
         // ---------------------------------------------------------------------------------------------------------- //
         // ---------------------------------------------------------------------------------------------------------- //
@@ -465,6 +464,7 @@ int main(int argc, char *argv[])
             //}
             //#pragma omp parallel sections
             //{
+
             #pragma omp section
             {
                 // Compute the residual between two successive iterations
@@ -530,17 +530,13 @@ int main(int argc, char *argv[])
             }
         }
 
-        /*
-         *
-         *  gsSpaceTimeSpaceGradSliceNorm<real_t> eSpaceTimeSpaceGradBottomSliceNorm(solutionFieldVector[refCount],
-         *  * uForOMP[11], spaceTimeAssemblerV.patches().interfaces(), bottomSides);
-                gradxe0Vector[refCount] = eSpaceTimeSpaceGradBottomSliceNorm.compute();
-                gsInfo << "t_{e/w} (|| grad_x e ||_0)   = " << watches[1].stop() << " sec.\n";
-         */
-
-        eFullSpaceTimeVector[refCount]          = math::sqrt(math::pow(eSpaceTimeVector[refCount], 2) +  math::pow(eTVector[refCount], 2) + theta * hminVector[refCount] * math::pow(gradxeTVector[refCount], 2));
+        // || e ||_{s, h}
+        eFullSpaceTimeVector[refCount]          = math::sqrt(math::pow(eSpaceTimeVector[refCount], 2) +  math::pow(eTVector[refCount], 2) + theta * hmaxVector[refCount] * math::pow(gradxeTVector[refCount], 2));
+        // || e ||_{L}
         eFullSpaceTimeSolOperVector[refCount]   = math::sqrt(math::pow(eSpaceTimeSolOperVector[refCount], 2) + math::pow(gradxeTVector[refCount], 2));
+        // Id
         eFullIdentVector[refCount]              = math::sqrt(math::pow(eIdentVector[refCount], 2) + math::pow(gradxe0Vector[refCount], 2));
+        // [e]
         eFullSpaceTimeSpaceGradVector[refCount] = math::sqrt(math::pow(eSpaceTimeSpaceGradVector[refCount], 2) + math::pow(eTVector[refCount], 2));
 
         testSpaceTime.gsLogRefinementIterationErrorReport(refCount, theta, hmaxVector, hminVector,
@@ -608,7 +604,6 @@ int main(int argc, char *argv[])
 
         //! [Error and Residual Estimate Computation]
 
-
         // Log and plotToParaview the results
         testSpaceTime.gsLogRefinementIterationInfo(refCount, vDOFs, yDOFs, wDOFs,
                                                        eH1Vector, eL2Vector,
@@ -619,11 +614,13 @@ int main(int argc, char *argv[])
 
         if (refCount <= numTotalAdaptRef - 1) {
             testSpaceTime.gsSaveToFileRefinementIterationInfo(saveToFile,
-                                                             v, spaceTimeAssemblerV.multiBasis(),
-                                                             eSpaceTimeSpaceGradDistr, mdDistr, eSpaceTimeSolOperDistr,
-                                                              eIdentDistr, e0Vector, eTVector, gradxe0Vector, gradxeTVector, refCount,
-                                                             refCount, numTotalAdaptRef,
-                                                             exampleNumber);
+                                                              v, spaceTimeAssemblerV.multiBasis(),
+                                                              eSpaceTimeSpaceGradDistr, mdDistr,
+                                                              eSpaceTimeSolOperDistr, eIdentDistr,
+                                                              e0Vector, eTVector, gradxe0Vector, gradxeTVector,
+                                                              refCount,
+                                                              refCount, numTotalAdaptRef,
+                                                              exampleNumber);
         }
         //! [Refine]
         if (refCount < numTotalAdaptRef - 1) {
@@ -635,8 +632,8 @@ int main(int argc, char *argv[])
                                              refCount,
                                              yBasisRefDelay,
                                              wBasisRefDelay);
-            //spaceTimeAssemblerV.refresh();
-            //spaceTimeAssemblerW.refresh();
+            spaceTimeAssemblerV.refresh();
+            spaceTimeAssemblerW.refresh();
 
             // get new interpolation points for v, y, w from new reconstructed basises
             gsMatrix<> vInterpPoints = spaceTimeAssemblerV.multiBasis().basis(0).anchors();

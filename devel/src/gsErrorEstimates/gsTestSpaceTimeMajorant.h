@@ -348,7 +348,8 @@ namespace gismo {
                     cFriedrichs = lx / PI;   // cFriedrichs <= 1 / (pi * sqrt(l_1^{-2} + ... + l_n^{-2}));
                     domainName = "rectangle $(0, 2) \\times (0, 1)$";
 
-                } else if (exampleNumber == 9 || exampleNumber == 10 || exampleNumber == 33 || exampleNumber == 34){
+                } else if (exampleNumber == 9 || exampleNumber == 10 || exampleNumber == 33 || exampleNumber == 34 ||
+                        exampleNumber == 35 || exampleNumber == 37 || exampleNumber == 38){
                     // --------------------------------------------------------------------------------
                     //  Rectangular domains examples
                     // --------------------------------------------------------------------------------
@@ -371,12 +372,21 @@ namespace gismo {
                     // --------------------------------------------------------------------------------
                     //  Unit square moving in time interval [0, 2]
                     // --------------------------------------------------------------------------------
-                    real_t x0(0.0), y0(0.0), lx(1.0), ly(1.0);
+                    real_t x0(-1.0), y0(-1.0), lx(0.0), ly(0.0);
                     real_t tT(2.0);
                     gsTensorBSpline<2,real_t>::uPtr geo2D = gsNurbsCreator<>::BSplineRectangle(x0, y0, lx, ly);
                     patches = * gsNurbsCreator<>::lift3D(*geo2D, tT);
-                    cFriedrichs = 1.0 / (math::sqrt((real_t) (dim - 1)) * PI);
                     domainName = "unit square x [0, 2]";
+
+                    cFriedrichs = 1.0 / (math::sqrt(1.0 / 2.0) * PI);
+                    /*
+                    real_t lz(2.0);
+                    gsTensorBSpline<2,real_t>::uPtr geo2D = gsNurbsCreator<>::BSplineLShape_p1();
+                    patches = * gsNurbsCreator<>::lift3D(*geo2D, lz);
+                    cFriedrichs = 1.0 / (math::sqrt(1.0 / 2.0) * PI);
+                    domainName = "L-shape, 3d";
+                    */
+
                 }
                 else if (exampleNumber == 28) {
                     // --------------------------------------------------------------------------------
@@ -421,6 +431,17 @@ namespace gismo {
                     domainName = "quarter-annulus lifted in time";
                 }
                 else if (exampleNumber == 15)
+                {
+                    // --------------------------------------------------------------------------------
+                    //  3d L-shaped domain
+                    // --------------------------------------------------------------------------------
+                    real_t lz(2.0);
+                    gsTensorBSpline<2,real_t>::uPtr geo2D = gsNurbsCreator<>::BSplineLShape_p2C1();
+                    patches = * gsNurbsCreator<>::lift3D(*geo2D, lz);
+                    cFriedrichs = 1.0 / (math::sqrt(1.0 / 2.0) * PI);
+                    domainName = "L-shape, 3d";
+                }
+                else if (exampleNumber == 36)
                 {
                     // --------------------------------------------------------------------------------
                     //  3d L-shaped domain
@@ -711,10 +732,22 @@ namespace gismo {
                 break;
 
             case 32:
-                uExpr = "if( y > 0, (z^3 - z^2 + z + 1)*exp(-0.1*(z-3/4)^2) * (x^2 + y^2)^(1.0/3.0) * sin( (2.0*atan2(y,x) - pi)/3.0 ), "
-                        "           (z^3 - z^2 + z + 1)*exp(-0.1*(z-3/4)^2) * sin( (2.0*atan2(y,x) + 3.0*pi)/3.0 ) )";
-                fExpr = "if( y > 0, (exp(-(x - 3/4)^2/10)*(- 4*x^4 + 7*x^3 + 53*x^2 - 41*x + 23))/20 * (x^2 + y^2)^(1.0/3.0) * sin( (2.0*atan2(y,x) - pi)/3.0 ), "
-                        "           (exp(-(x - 3/4)^2/10)*(- 4*x^4 + 7*x^3 + 53*x^2 - 41*x + 23))/20 * sin( (2.0*atan2(y,x) + 3.0*pi)/3.0 ) )";
+                /*
+                uExpr = "if( (y >= 0 & x > 0) | (y > 0 & x <= 0), "
+                        "    (z^2 + z + 1) * (x^2 + y^2)^(1.0/3.0) * sin( (2.0 * (2.0 * atan(y/ (sqrt(x^2 + y^2) + x) ) ) - pi)/3.0 ), "
+                        "    (z^2 + z + 1) * (x^2)^(1.0/3.0) * sin( pi/3.0 ) "
+                        ")";;
+                fExpr = "if( (y >= 0 & x > 0) | (y > 0 & x <= 0), "
+                        "     0, "
+                        "     (2*z + 1) * 2.0/9.0 * (x)^(-4.0/3.0) * sin( pi/3.0 ) "
+                        ")";
+                */
+                /*
+                uExpr = "if( y > 0, (z^2 + z + 1) * (x^2 + y^2)^(1.0/3.0) * sin( (2.0*atan2(y,x) - pi)/3.0 ), "
+                        "           (z^2 + z + 1) * (x^2 + y^2)^(1.0/3.0) * sin( (2.0*atan2(y,x) + 3.0*pi)/3.0 ) )";
+                fExpr = "if( y > 0, (2*z + 1) * (x^2 + y^2)^(1.0/3.0) * sin( (2.0*atan2(y,x) - pi)/3.0 ), "
+                        "           (2*z + 1) * (x^2 + y^2)^(1.0/3.0) * sin( (2.0*atan2(y,x) + 3.0*pi)/3.0 ) )";
+                */
                 uDExpr = uExpr;
                 break;
 
@@ -733,6 +766,33 @@ namespace gismo {
                 uDExpr = uExpr;
                 break;
 
+            case 35:
+                uExpr = "if( y <= 1, sin(pi*x)*(1 - y)^(1.5), sin(pi*x)*(-1 + y)^1.5)";
+                fExpr = "if( y <= 1, -(sin(pi*x)*(1 - y)^(1/2)*(2*y*pi^2 - 2*pi^2 + 3))/2, "
+                        "            (sin(pi*x)*(y - 1)^(1/2)*(2*y*pi^2 - 2*pi^2 + 3))/2)";
+                uDExpr = uExpr;
+                break;
+
+            case 36:
+                uExpr = "if( y > 0, 10*(10*z - 1/2)*(z - 1)*(z - 7/4) * (x^2 + y^2)^(1.0/3.0) * sin( (2.0*atan2(y,x) - pi)/3.0 ), "
+                        "           10*(10*z - 1/2)*(z - 1)*(z - 7/4) * (x^2 + y^2)^(1.0/3.0) * sin( (2.0*atan2(y,x) + 3.0*pi)/3.0 ) )";
+                fExpr = "if( y > 0, (300*z^2 - 560*z + 755/4) * (x^2 + y^2)^(1.0/3.0) * sin( (2.0*atan2(y,x) - pi)/3.0 ), "
+                        "           (300*z^2 - 560*z + 755/4) * (x^2 + y^2)^(1.0/3.0) * sin( (2.0*atan2(y,x) + 3.0*pi)/3.0 ) )";
+
+                uDExpr = uExpr;
+                break;
+
+            case 37:
+                uExpr = "sin(3*pi*x)*tanh(1 - 10*y)*tanh(10 - 10*y)";
+                fExpr = "9*pi^2*sin(3*pi*x)*tanh(10*y - 1)*tanh(10*y - 10) - sin(3*pi*x)*tanh(10*y - 10)*(10*tanh(10*y - 1)^2 - 10) - sin(3*pi*x)*tanh(10*y - 1)*(10*tanh(10*y - 10)^2 - 10)";
+                uDExpr = uExpr;
+                break;
+
+            case 38:
+                uExpr = "tanh(1 - (x + 10*y - 2))";
+                fExpr = "2*tanh(x + 10*y - 3)*(tanh(x + 10*y - 3)^2 - 1) + 10*tanh(x + 10*y - 3)^2 - 10";
+                uDExpr = uExpr;
+                break;
 
             default :
                 gsInfo << "WARNING: The data functions were prescribed.\n";
@@ -935,7 +995,13 @@ namespace gismo {
         gsMatrix<real_t> divdivRhs = divdivAssembler.rhs();
         gsMatrix<real_t> vectmassRhs = dualAssembler.rhs();
 
-        gsSaveToFileDivDivMMMatrices(false, divdivM, vectmassM, refCounter, exampleNumber);
+        //gsInfo << "divdivM = " << divdivAssembler.matrix().toDense() << "\n";
+        //gsInfo << "divdivRhs = " << divdivAssembler.rhs() << "\n";
+
+        //gsInfo << "vectmassM = " << dualAssembler.matrix().toDense() << "\n";
+        //gsInfo << "vectmassRhs = " << dualAssembler.rhs() << "\n";
+
+        //gsSaveToFileDivDivMMMatrices(false, divdivM, vectmassM, refCounter, exampleNumber);
 
         // initialize components related to the maj and majh
         real_t mEq(0.0), mD(0.0), maj(0.0), divmD(0.0), majh(0.0), majUpwindSq(0.0), majSq(0.0);
@@ -954,7 +1020,7 @@ namespace gismo {
 
 
         real_t ratioDualEq(10.0);                   // ratio for exiting criterion form the loop
-        int iterMajOpt = 1;                         // number of loops to update beta and flux
+        int iterMajOpt = 2;                         // number of loops to update beta and flux
 
         real_t h(hminVector[refCounter]);           // h_min = h_max in
         real_t delta_h = theta * h;
@@ -963,8 +1029,10 @@ namespace gismo {
         gsInfo << " Solving optimal system for the majorant \n";
         gsInfo << "---------------------------------------------------------------------------------\n";
 
-
         if (withMajorant && withMajorantOptimization) {
+
+            gsInfo << "ERROR CONTROL CONFIGURATION: withMajorant = " << withMajorant << " ; withMajorantOptimization = " << withMajorantOptimization << "\n";
+
             for (index_t i = 0; i < iterMajOpt; i++) {
                 /*
                 // old version
@@ -1081,7 +1149,7 @@ namespace gismo {
                     {
                         gsErrEstEquilSpaceTimeMajorant<real_t> meqIndicator(v, y, fFunc);
                         clock_1.restart();
-                        mEq = meqIndicator.compute(true, elemNum);
+                        mEq = meqIndicator.compute(false, elemNum);
                         timeAsmblMeq += clock_1.stop();
                         gsInfo << "time for element-wise evaluation of the mEq: " << timeAsmblMeq << " sec.\n";
                     }
@@ -1111,7 +1179,7 @@ namespace gismo {
                     {
                         gsErrEstDualSpaceTimeMajorantII<real_t> mIIdIndicator(v, y, w);
                         clock_5.restart();
-                        mIID = mIIdIndicator.compute(false, elemNum);
+                        mIID = mIIdIndicator.compute(true, elemNum);
                         gsInfo << "time for element-wise evaluation of the mIID: " << clock_5.stop() << " sec.\n";
                         mIIdDistr = mIIdIndicator.elementNorms();
                     }
@@ -1199,42 +1267,138 @@ namespace gismo {
                 // If the ratio between m_d and mEq is more then certain threshhold, do no continue to optimize
                 if (mD / mEq >= ratioDualEq) iterMajOpt = i;
             }
-            /*
-            if (!withMajorantOptimization) {
-                gsSparseMatrix<real_t> yM_ = dualAssembler.matrix().block(0, 0, newSize, newSize);
-                gsMatrix<real_t> yRhs_ = dualAssembler.rhs().block(0, 0, newSize, 1);
-                gsSolveMajorantOptimalSystem(yM_, yRhs_, yVector_, timeSolvY, refCounter, 0, yDOFs,
-                                                   stopcritVector);
+        }
 
-                yVector.setZero(currentSize, 1);
-                yVector.block(0, 0, newSize, 1) = yVector_;
-                yVector.resize(yDOFs[refCounter], dim);
-                gsSetYRefVector(yVector);
+        if (withMajorant && !withMajorantOptimization) {
 
-                dualAssembler.constructSolution(yVector, mpY);
-                const gsField<real_t> y(dualAssembler.patches(), mpY);
+            gsInfo << "ERROR CONTROL CONFIGURATION:"
+                    " withMajorant = " << withMajorant << " ; "
+                    "!withMajorantOptimization = " << !withMajorantOptimization << "\n";
 
+            gsSparseMatrix<real_t> yM_ = dualAssembler.matrix().block(0, 0, newSize, newSize);
+            gsMatrix<real_t> yRhs_ = dualAssembler.rhs().block(0, 0, newSize, 1);
+            gsSolveMajorantOptimalSystem(yM_, yRhs_, yVector_, timeSolvY, refCounter, 0, yDOFs,
+                                         stopcritVector);
+
+            yVector.setZero(currentSize, 1);
+            yVector.block(0, 0, newSize, 1) = yVector_;
+            yVector.resize(yDOFs[refCounter], dim);
+            gsSetYRefVector(yVector);
+
+            dualAssembler.constructSolution(yVector, mpY);
+            const gsField<real_t> y(dualAssembler.patches(), mpY);
+
+            gsCPUStopwatch clock_1, clock_2;
+            real_t timeAsmblMd(0.0), timeAsmblMeq(0.0);
+
+#pragma omp parallel sections
+            {
+#pragma omp section
+                {
+                    gsErrEstDualSpaceTimeMajorant<real_t> mdIndicator(v, mpY);
+                    clock_2.restart();
+                    mD = mdIndicator.compute(true, elemNum);
+                    timeAsmblMd += clock_2.stop();
+                    gsInfo << "time for element-wise evaluation of the mD: " << timeAsmblMd << " sec.\n";
+                    mdDistr = mdIndicator.elementNorms();
+                }
+#pragma omp section
+                {
+                    gsErrEstEquilSpaceTimeMajorant<real_t> meqIndicator(v, y, fFunc);
+                    clock_1.restart();
+                    mEq = meqIndicator.compute(false, elemNum);
+                    timeAsmblMeq += clock_1.stop();
+                    gsInfo << "time for element-wise evaluation of the mEq: " << timeAsmblMeq << " sec.\n";
+                }
             }
-            if (!withMajorantEquilibration) {
-                gsSparseMatrix<real_t> yM_ = divdivAssembler.matrix().block(0, 0, newSize, newSize);
-                gsMatrix<real_t> yRhs_ = - divdivAssembler.rhs().block(0, 0, newSize, 1);
-                gsSolveMajorantOptimalSystem(yM_, yRhs_, yVector_, timeSolvY, refCounter, 0, yDOFs,
-                                                   stopcritVector);
 
-                yVector.setZero(currentSize, 1);
-                yVector.block(0, 0, newSize, 1) = yVector_;
+            timeAsmblMaj[refCounter] += (timeAsmblMd > timeAsmblMeq ? timeAsmblMd : timeAsmblMeq);
+            gsInfo << "increment time for element-wise evaluation of the majorant: " << clock.stop() << " sec.\n";
 
-                yVector.resize(yDOFs[refCounter], dim);
-                gsSetYRefVector(yVector);
-                divdivAssembler.constructSolution(yVector, mpY);
-                const gsField<real_t> y(divdivAssembler.patches(), mpY);
-            }
-            */
+            // Update beta and alpha
+            beta = cFriedrichs * mEq / mD;
+            majSq = math::pow(e0Vector[refCounter], 2) + (1 + beta) * math::pow(mD, 2) +
+                    (1 + 1 / beta) * math::pow(cFriedrichs * mEq, 2);
+            // Update error estimate majI
+            maj = math::sqrt(majSq);
+
+            std::cout << std::scientific;
+            gsInfo << "maj   = " << maj << "\t"
+                   << "mD  = " << mD << "\t"
+                   << "mEq  = " << mEq << "\t"
+                   << "maj0   = " << e0Vector[refCounter] << "\t";
+            gsInfo << "beta  = " << beta << "\n\n";
+            std::cout.unsetf(std::ios::scientific);
 
         }
 
+        if (withMajorant && withMajorantEquilibration && !withMajorantOptimization) {
+
+            gsInfo << "\n\nERROR CONTROL CONFIGURATION:"
+                    " withMajorant = " << withMajorant << " ; "
+                    "!withMajorantOptimization = " << !withMajorantOptimization << " ;  "
+                    " withMajorantEquilibration = " << withMajorantEquilibration << "\n\n";
+
+            gsSparseMatrix<real_t> yM_ = divdivM.block(0, 0, newSize, newSize);
+            gsMatrix<real_t> yRhs_     = - divdivRhs.block(0, 0, newSize, 1);
+            //gsSparseMatrix<real_t> yM_ = divdivAssembler.matrix().block(0, 0, newSize, newSize);
+            //gsMatrix<real_t> yRhs_ = - divdivAssembler.rhs().block(0, 0, newSize, 1);
+            gsSolveMajorantOptimalSystem(yM_, yRhs_, yVector_, timeSolvY, refCounter, 0, yDOFs,
+                                         stopcritVector);
+
+            yVector.setZero(currentSize, 1);
+            yVector.block(0, 0, newSize, 1) = yVector_;
+
+            yVector.resize(yDOFs[refCounter], dim);
+            gsSetYRefVector(yVector);
+            divdivAssembler.constructSolution(yVector, mpY);
+            const gsField<real_t> y(divdivAssembler.patches(), mpY);
+
+            gsCPUStopwatch clock_1, clock_2;
+            real_t timeAsmblMd(0.0), timeAsmblMeq(0.0);
+
+#pragma omp parallel sections
+            {
+#pragma omp section
+                {
+                    gsErrEstDualSpaceTimeMajorant<real_t> mdIndicator(v, mpY);
+                    clock_2.restart();
+                    mD = mdIndicator.compute(true, elemNum);
+                    timeAsmblMd += clock_2.stop();
+                    gsInfo << "time for element-wise evaluation of the mD: " << timeAsmblMd << " sec.\n";
+                    mdDistr = mdIndicator.elementNorms();
+                }
+#pragma omp section
+                {
+                    gsErrEstEquilSpaceTimeMajorant<real_t> meqIndicator(v, y, fFunc);
+                    clock_1.restart();
+                    mEq = meqIndicator.compute(false, elemNum);
+                    timeAsmblMeq += clock_1.stop();
+                    gsInfo << "time for element-wise evaluation of the mEq: " << timeAsmblMeq << " sec.\n";
+                }
+            }
+
+            timeAsmblMaj[refCounter] += (timeAsmblMd > timeAsmblMeq ? timeAsmblMd : timeAsmblMeq);
+            gsInfo << "increment time for element-wise evaluation of the majorant: " << clock.stop() << " sec.\n";
+
+            // Update beta and alpha
+            beta = cFriedrichs * mEq / mD;
+            majSq = math::pow(e0Vector[refCounter], 2) + (1 + beta) * math::pow(mD, 2) +
+                    (1 + 1 / beta) * math::pow(cFriedrichs * mEq, 2);
+            // Update error estimate majI
+            maj = math::sqrt(majSq);
+
+            std::cout << std::scientific;
+            gsInfo << "maj   = " << maj << "\t"
+                   << "mD  = " << mD << "\t"
+                   << "mEq  = " << mEq << "\t"
+                   << "maj0   = " << e0Vector[refCounter] << "\t";
+            gsInfo << "beta  = " << beta << "\n\n";
+            std::cout.unsetf(std::ios::scientific);
+        }
+
         majVector[refCounter] = maj;
-        mdVector[refCounter] = mD;
+        mdVector[refCounter]  = mD;
         meqVector[refCounter] = mEq;
         majhVector[refCounter] = majh;
         majIIVector[refCounter] = majII; // = majII / majIIGap;
@@ -1757,7 +1921,8 @@ namespace gismo {
                                                          gsVector<index_t> &vDOFs, gsVector<index_t> &yDOFs, gsVector<index_t> &wDOFs,
                                                          gsVector<real_t> &eVector, gsVector<real_t> &eL2Vector,
                                                          gsVector<real_t> &eSpaceTimeVector,
-                                                         gsVector<real_t> &eSpaceTimeSeminormVector, gsVector<real_t> &eFullSpaceTimeSeminormVector,
+                                                         gsVector<real_t> &eSpaceTimeSeminormVector,
+                                                         gsVector<real_t> &eFullSpaceTimeSeminormVector,
                                                          gsVector<real_t> &eSpaceTimeSolOperVector,
                                                          gsVector<real_t> &relErrorVector, gsVector<real_t> &relError0Vector, gsVector<real_t> &thetaVector, gsVector<real_t> &stopcritVector,
                                                          gsVector<real_t> &majVector, gsVector<real_t> &majhVector, gsVector<real_t> &majIIVector, gsVector<real_t> &majIIGapVector, gsVector<real_t> &minVector,
