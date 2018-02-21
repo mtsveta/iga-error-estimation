@@ -148,7 +148,7 @@ namespace gismo
 
                 T h_k     = element.getCellSize();
                 T C_invK  = 1;
-                T theta_K = d * math::pow(C_invK, -2) * h_K;
+                T theta_K = h_K / ( d * math::pow(C_invK, 2));
                 T delta_K = theta_K * h_K;
 
                 // upwind vector = w = [wh_1 .... wh_N], where N is number of active basis function

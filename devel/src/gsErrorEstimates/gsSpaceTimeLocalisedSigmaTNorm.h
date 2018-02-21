@@ -156,7 +156,7 @@ namespace gismo
                 T weight = quWeights[k] * unormal.norm();
                 T h_K = element.getCellSize();
                 T C_invK = 1;
-                T theta_K = d * math::pow(C_invK, -2) * h_K;
+                T theta_K = h_K / ( d * math::pow(C_invK, 2));
                 T delta_K = theta_K * h_K;
 
                 //gsInfo << "unormal \n " << unormal << "\n";
