@@ -260,12 +260,9 @@ int main(int argc, char *argv[])
     //! [Define Auxiliary Structures to Store the Results]
     gsPoissonPde<> heatPde(testSpaceTime.patches, bcInfo, fFunc);
 
-    real_t theta = 1;
-    gsFunctionExpr<real_t> thetaFunc(std::to_string(theta), testSpaceTime.dim);
-
     gsSpaceTimeLocalisedAssembler<real_t> spaceTimeAssemblerV;
     //if (!testSpaceTime.isAdaptive)
-    spaceTimeAssemblerV = gsSpaceTimeLocalisedAssembler<real_t>(testSpaceTime.patches, basisV, bcInfo, *heatPde.rhs(), thetaFunc);
+    spaceTimeAssemblerV = gsSpaceTimeLocalisedAssembler<real_t>(testSpaceTime.patches, basisV, bcInfo, *heatPde.rhs());
     //else
     //    spaceTimeAssemblerV = gsSpaceTimeAssembler<real_t>(testSpaceTime.patches, basisV, bcInfo, *heatPde.rhs());
     //spaceTimeAssemblerV.initialize(heatPde, basisV);
@@ -274,7 +271,7 @@ int main(int argc, char *argv[])
 
     gsSpaceTimeAssembler<real_t> spaceTimeAssemblerW;
     //if (!testSpaceTime.isAdaptive)
-    spaceTimeAssemblerW = gsSpaceTimeLocalisedAssembler<real_t>(testSpaceTime.patches, basisW, bcInfo, *heatPde.rhs(), thetaFunc);
+    spaceTimeAssemblerW = gsSpaceTimeLocalisedAssembler<real_t>(testSpaceTime.patches, basisW, bcInfo, *heatPde.rhs());
     //else
     //    spaceTimeAssemblerW = gsSpaceTimeAssembler<real_t>(testSpaceTime.patches, basisW, *bcInfoP, *heaPdeRhsP);
     //spaceTimeAssemblerW.initialize(heatPde, basisW);
@@ -295,19 +292,9 @@ int main(int argc, char *argv[])
                                                spaceTimeAssemblerV.multiBasis(NUM_PATCHES-1), basisY,
                                                spaceTimeAssemblerW.multiBasis(NUM_PATCHES-1));
 
-        //if (refCount > 0)
         hmaxVector[refCount] = spaceTimeAssemblerV.multiBasis(0).basis(0).getMaxCellLength();
         hminVector[refCount] = spaceTimeAssemblerV.multiBasis(0).basis(0).getMinCellLength();
 
-        if (testSpaceTime.isAdaptive) {
-            //theta = hminVector[refCount];
-            // theta = math::pow(hminVector[refCount], 2);
-            theta = 0.0;
-            gsFunctionExpr <real_t> updatedThetaFunc(std::to_string(theta), testSpaceTime.dim);
-            spaceTimeAssemblerV.thetaUpdate(fFunc, updatedThetaFunc);
-            spaceTimeAssemblerW.thetaUpdate(fFunc, updatedThetaFunc);
-            thetaFunc = updatedThetaFunc;
-        }
         testSpaceTime.gsRecontructV(refCount, spaceTimeAssemblerV, bcInfo, vVector, mpV, v, vDOFs,
                                     stopcritVector, timeAsmbV, timeSolvV);
         testSpaceTime.gsRecontructW(refCount, spaceTimeAssemblerW, bcInfo, wVector, mpW, w, wDOFs,
