@@ -17,16 +17,19 @@
 #include <gsErrorEstimates/gsSpaceTimeLocalisedAssembler.h>
 #include <gsErrorEstimates/gsSpaceTimeLocalisedNorm.h>
 #include <gsErrorEstimates/gsSpaceTimeLocalisedSigmaTNorm.h>
+#include <gsErrorEstimates/gsTestSpaceTimeLocalisedMajorant.h>
+
 
 #include <gsErrorEstimates/gsSpaceTimeSliceNorm.h>
 #include <gsErrorEstimates/gsSpaceTimeSpaceGradSliceNorm.h>
 #include <gsErrorEstimates/gsErrEstSpaceTimeResidual.h>
-#include <gsErrorEstimates/gsTestSpaceTimeMajorant.h>
 #include <gsErrorEstimates/gsNormFields.h>
 #include <gsErrorEstimates/gsSpaceTimeSpaceGradNorm.h>
 #include <gsErrorEstimates/gsSpaceTimeSolOperNorm.h>
 #include <gsErrorEstimates/gsSpaceTimeDeltaxNorm.h>
 #include <gsErrorEstimates/gsSpaceTimeDtNorm.h>
+#include <gsErrorEstimates/gsSpaceTimeDeltaxDeltaKNorm.h>
+#include <gsErrorEstimates/gsSpaceTimeDtDeltaKNorm.h>
 #include <gsErrorEstimates/gsSpaceTimeErrorIdentity.h>
 #include <gsErrorEstimates/gsErrEstSpaceTimeMinorant.h>
 #include <gsAssembler/gsAdaptiveRefUtils.h>
@@ -67,14 +70,14 @@ int main(int argc, char *argv[])
     bool saveToFile     = true;  // Flag indicating whether objects must be plotted in ParaView
     bool isAdaptive     = true;
     bool withMajorant   = true;
-    bool withMajorantOptimization = false;
-    bool withMajorantEquilibration = true;
+    bool withMajorantOptimization = true;
+    bool withMajorantEquilibration = false;
 
     if ( !gsParseCommandLine(argc, argv, plotToParaview) ) return 0;
 
     // Define test-case parameters (number and dimension)
     const unsigned
-            exampleNumber(2), d(2);        // 2 example: 2d unit square, u = (1 - x)*x*x*(1 - t)*t
+    // exampleNumber(2), d(2);        // 2 example: 2d unit square, u = (1 - x)*x*x*(1 - t)*t
     // exampleNumber(3), d(2);        // 3 example: 2d unit square, u = sin(pi*x)*sin(pi*t)
     // exampleNumber(4), d(2);        // 4 example: 2d unit square, u = sin(6.0*pi*x)*sin(3.0*pi*t)
     // exampleNumber(5), d(2);        // 5 example: 2d unit square, u = cos(x)*exp(t)
@@ -96,7 +99,7 @@ int main(int argc, char *argv[])
     // exampleNumber(20), d(3);     // 20 example: unit cube, u = sin(pi*x)*sin(pi*y)*sin(pi*t),        non-homogeneous BC
     // exampleNumber(25), d(3);     // 25 example: unit cube, u = (1 - x)*x^2*(1 - y)*y^2*(1 - z)*z^2,  homogeneous BC
     // exampleNumber(21), d(3);       // 21 example: unit cube, u = cos(x)*exp(y)*sin(pi*t),              non-homogeneous BC
-    // exampleNumber(23), d(3);     // 23 example: 2d+1 quater annulus + [0, 1] in time, u = (1 - x)*x^2*(1 - y)*y^2*(1 - z)*z^2
+    exampleNumber(23), d(3);     // 23 example: 2d+1 quater annulus + [0, 1] in time, u = (1 - x)*x^2*(1 - y)*y^2*(1 - z)*z^2
     // exampleNumber(24), d(3);     // 24 example: 2d+1 quater annulus + [0, 1] in time, u = sin(pi*x)*sin(pi*y)*sin(pi*z)
     // exampleNumber(26), d(3);       // 26 example: 2d+1 quater annulus + [0, 1] in time, u = (1 - x)*x^2*(1 - y)*y^2*(1 - z)*z^2
     // exampleNumber(27), d(3);     // 27 example: square x [0, 2], u = (1 - x)*x^2*(1 - y)*y^2*(2 - z)*z^2,  homogeneous BC
@@ -113,7 +116,7 @@ int main(int argc, char *argv[])
     //const unsigned d(2);
     //const unsigned d(3);    // Dimension must be prescribed
 
-    gsTestSpaceTimeMajorant<d> testSpaceTime(exampleNumber,
+    gsTestSpaceTimeLocalisedMajorant<d> testSpaceTime(exampleNumber,
                                              isAdaptive,
                                              withMajorant, withMajorantOptimization,
                                              withMajorantEquilibration);
@@ -127,13 +130,13 @@ int main(int argc, char *argv[])
 
     // Setting up the refinement strategy
     // Number of initial uniform and total unif./adapt. refinement steps
-    unsigned int numInitUniformRefV(1), numInitUniformRefY(1), numInitUniformRefW(1), numTotalAdaptRef(8);
+    unsigned int numInitUniformRefV(1), numInitUniformRefY(1), numInitUniformRefW(1), numTotalAdaptRef(6);
 
     MarkingStrategy adaptRefCrit(BULK); // with alternatives GARU, PUCA, and BULK
     //MarkingStrategy adaptRefCrit(GARU);
     real_t markingParamTheta(0.4);  // parameter theta in marking strategy
-    unsigned int yBasisRefDelay(5); // parameter for the delay in updating y_h basis for the refinement
-    unsigned int wBasisRefDelay(5); // parameter for the delay in updating w-h basis for the refinement
+    unsigned int yBasisRefDelay(3); // parameter for the delay in updating y_h basis for the refinement
+    unsigned int wBasisRefDelay(3); // parameter for the delay in updating w-h basis for the refinement
 
     testSpaceTime.gsCreateResultsFolder(saveToFile, exampleNumber,
                                         vDegree, yDegree, wDegree, yBasisRefDelay, wBasisRefDelay,
@@ -165,15 +168,19 @@ int main(int argc, char *argv[])
     //! [Define Auxiliary Structures for Storing of the Results]
     // -------------------------------------------------------------------------------------------------------------- //
     // Initialize arrays to store the error and estimators on each refinement step
-    gsVector<real_t> eL2Vector(numTotalAdaptRef),           // || e_i ||_Q        := || u - u_i ||_Q
-            eH1Vector(numTotalAdaptRef),                    // || grad e_i ||_Q   := || grad(u - u_i) ||_Q
-            eSpaceTimeVector(numTotalAdaptRef),             // ||| e_i |||_h      := (|| grad_x e_i ||^2_Q + detla_h * || (u - u_i)_t ||^2_Q)^1/2
-            eFullSpaceTimeVector(numTotalAdaptRef),         // ||| e_i |||_h      := (|| grad_x e_i ||^2_Q + detla_h * || (e_i)_t ||^2_Q + || e_i ||^2_T + detla_h * || grad_x e_i ||^2_T)^1/2
+    gsVector<real_t> eL2Vector(numTotalAdaptRef),           // || e_i ||_Q          := || u - u_i ||_Q
+            eH1Vector(numTotalAdaptRef),                    // || grad e_i ||_Q     := || grad(u - u_i) ||_Q
+            eSpaceTimeVector(numTotalAdaptRef),             // ||| e_i |||_h        := (|| grad_x e_i ||^2_Q + detla_h * || (u - u_i)_t ||^2_Q)^1/2
+            eFullSpaceTimeVector(numTotalAdaptRef),         // ||| e_i |||_h        := (|| grad_x e_i ||^2_Q + detla_h * || (e_i)_t ||^2_Q + || e_i ||^2_T + detla_h * || grad_x e_i ||^2_T)^1/2
+            eFullSpaceTimeLocVector(numTotalAdaptRef),      // ||| e_i |||_{h, loc} := (|| grad_x e_i ||^2_Q + || e_i ||^2_T + 1/2 * \sum_{K \in K_h} detla_K * (|| (e_i)_t ||^2_K)^1/2
+            eFullSpaceTimeFullLocVector(numTotalAdaptRef),  // ||| e_i |||_{h, loc} := (|| grad_x e_i ||^2_Q + || e_i ||^2_T + 1/2 * \sum_{K \in K_h} detla_K * (|| (e_i)_t ||^2_K - || laplas_x e_i ||^2_K)^1/2
             eSpaceTimeSpaceGradVector(numTotalAdaptRef),    // || grad_x e_i ||_Q
             eFullSpaceTimeSpaceGradVector(numTotalAdaptRef),// (|| grad_x e_i ||^2_Q + || e_i ||^2_T)^2
             eSpaceTimeSolOperVector(numTotalAdaptRef),      // (|| Delta_x e_i ||^2_Q + || (e_i)_t||^2_Q )^1/2
             eSpaceTimeDeltaxVector(numTotalAdaptRef),       // || Delta_x e_i ||_Q
+            eSpaceTimeDeltaxDeltaKVector(numTotalAdaptRef), // (delta_K * || Delta_x e_i ||^_Q)^1/2
             eSpaceTimeDtVector(numTotalAdaptRef),           // || (e_i)_t||^2_Q
+            eSpaceTimeDtDeltaKVector(numTotalAdaptRef),     // (delta_K * || (e_i)_t||^2_Q)^1/2
             eFullSpaceTimeSolOperVector(numTotalAdaptRef),  // || e_i ||_{L, Q}   := (|| Delta_x e_i ||^2_Q + || (e_i)_t||^2_Q + || grad_x e_i ||^2_T)^1/2
             eIdentVector(numTotalAdaptRef),                 // || Delta_x u_i + f - (u_i)_t ||_Q
             eFullIdentVector(numTotalAdaptRef),             // (|| Delta_x u_i + f - (u_i)_t ||_Q + || grad_x e_i ||_0)^1/2
@@ -223,6 +230,8 @@ int main(int argc, char *argv[])
             timeAsmbSpaceTimeSolOperError(numTotalAdaptRef),
             timeAsmbSpaceTimeDeltaxError(numTotalAdaptRef),
             timeAsmbSpaceTimeDtError(numTotalAdaptRef),
+            timeAsmbSpaceTimeDeltaxDeltaKError(numTotalAdaptRef),
+            timeAsmbSpaceTimeDtDeltaKError(numTotalAdaptRef),
             timeAsmbSpaceTimeErrorIdentity(numTotalAdaptRef),
             timeAsmbMajorant(numTotalAdaptRef),
             timeAsmbMajorantII(numTotalAdaptRef),
@@ -269,7 +278,7 @@ int main(int argc, char *argv[])
     spaceTimeAssemblerV.options().setInt("DirichletValues", dirichlet::l2Projection);
     spaceTimeAssemblerV.options().setInt("InterfaceStrategy", iFace::glue);
 
-    gsSpaceTimeAssembler<real_t> spaceTimeAssemblerW;
+    gsSpaceTimeLocalisedAssembler<real_t> spaceTimeAssemblerW;
     //if (!testSpaceTime.isAdaptive)
     spaceTimeAssemblerW = gsSpaceTimeLocalisedAssembler<real_t>(testSpaceTime.patches, basisW, bcInfo, *heatPde.rhs());
     //else
@@ -320,7 +329,7 @@ int main(int argc, char *argv[])
 
         std::vector<gsFunctionExpr<> *> uForOMP;
         std::vector<gsFunctionExpr<> *> fForOMP;
-        index_t numOfU(15);
+        index_t numOfU(17);
         index_t numOfF(1);
         index_t numOfWatches(21);
         std::vector<gsCPUStopwatch> watches(numOfWatches);
@@ -351,10 +360,29 @@ int main(int argc, char *argv[])
             }
 #pragma omp section
             {
+                gsSpaceTimeDeltaxDeltaKNorm<real_t> eSpaceTimeDeltaxDeltaK(v, * uForOMP[15]);
+                testSpaceTime.gsCalculateDistribution(eSpaceTimeDeltaxDeltaK, eSpaceTimeDeltaxDistr, elemNumber,
+                                                      eSpaceTimeDeltaxDeltaKVector, timeAsmbSpaceTimeDeltaxDeltaKError, refCount);
+                gsInfo << "t_{e/w} (delta_K * || Delta_x e ||)    = " <<  timeAsmbSpaceTimeDeltaxDeltaKError[refCount] << " sec.\n";
+                gsInfo << "delta_K * || Delta_x e || = " <<  eSpaceTimeDeltaxDeltaKVector[refCount] << " sec.\n";
+
+            }
+
+            #pragma omp section
+            {
                 gsSpaceTimeDtNorm<real_t> eSpaceTimeDt(v, * uForOMP[3]);
                 testSpaceTime.gsCalculateDistribution(eSpaceTimeDt, eSpaceTimeDtDistr, elemNumber,
                                                       eSpaceTimeDtVector, timeAsmbSpaceTimeDtError, refCount);
                 gsInfo << "t_{e/w} (|| Dt e ||)         = " <<  timeAsmbSpaceTimeDtError[refCount] << " sec.\n";
+            }
+
+#pragma omp section
+            {
+                gsSpaceTimeDtDeltaKNorm<real_t> eSpaceTimeDtDeltaK(v, * uForOMP[16]);
+                testSpaceTime.gsCalculateDistribution(eSpaceTimeDtDeltaK, eSpaceTimeDtDistr, elemNumber,
+                                                      eSpaceTimeDtDeltaKVector, timeAsmbSpaceTimeDtDeltaKError, refCount);
+                gsInfo << "t_{e/w} (delta_K * || Dt e ||) = " <<  timeAsmbSpaceTimeDtDeltaKError[refCount] << " sec.\n";
+                gsInfo << "delta_K * || Dt e || = " <<  eSpaceTimeDtDeltaKVector[refCount] << " sec.\n";
             }
 
 #pragma omp section
@@ -380,7 +408,7 @@ int main(int argc, char *argv[])
             }
 #pragma omp section
             {
-                gsSpaceTimeLocalisedNorm<real_t> eSpaceTimeNorm(v, * uForOMP[7], thetaFunc);
+                gsSpaceTimeLocalisedNorm<real_t> eSpaceTimeNorm(v, * uForOMP[7]);
                 testSpaceTime.gsCalculateDistribution(eSpaceTimeNorm, eSpaceTimeDistr, elemNumber,
                                                       eSpaceTimeVector, timeAsmbSpaceTimeError, refCount);
                 gsInfo << "t_{e/w} (|| e ||_{s, h, Q})  = " <<  timeAsmbSpaceTimeError[refCount] << " sec.\n";
@@ -427,7 +455,7 @@ int main(int argc, char *argv[])
 #pragma omp section
             {
                 watches[20].restart();
-                gsSpaceTimeLocalisedSigmaTNorm<real_t> eSigmaTNorm(v, * uForOMP[14], spaceTimeAssemblerV.patches().interfaces(), bottomSides, theta);
+                gsSpaceTimeLocalisedSigmaTNorm<real_t> eSigmaTNorm(v, * uForOMP[14], spaceTimeAssemblerV.patches().interfaces(), bottomSides);
                 ehSigmaTVector[refCount] = eSigmaTNorm.compute();
                 gsInfo << "t_{e/w} (|| e ||_{s,h, T})   = " << watches[20].stop() << " sec.\n";
 
@@ -520,18 +548,31 @@ int main(int argc, char *argv[])
         }
 
         // || e ||_{s, h}
-        eFullSpaceTimeVector[refCount]          = math::sqrt(math::pow(eSpaceTimeVector[refCount], 2) +  math::pow(eTVector[refCount], 2) + theta * hmaxVector[refCount] * math::pow(gradxeTVector[refCount], 2));
+        eFullSpaceTimeVector[refCount]          = math::sqrt(math::pow(eSpaceTimeVector[refCount], 2)
+                                                             +  math::pow(ehSigmaTVector[refCount], 2));
         // || e ||_{L}
-        eFullSpaceTimeSolOperVector[refCount]   = math::sqrt(math::pow(eSpaceTimeSolOperVector[refCount], 2) + math::pow(gradxeTVector[refCount], 2));
+        eFullSpaceTimeSolOperVector[refCount]   = math::sqrt(math::pow(eSpaceTimeSolOperVector[refCount], 2)
+                                                             + math::pow(gradxeTVector[refCount], 2));
         // Id
-        eFullIdentVector[refCount]              = math::sqrt(math::pow(eIdentVector[refCount], 2) + math::pow(gradxe0Vector[refCount], 2));
+        eFullIdentVector[refCount]              = math::sqrt(math::pow(eIdentVector[refCount], 2)
+                                                             + math::pow(gradxe0Vector[refCount], 2));
         // [e]
-        eFullSpaceTimeSpaceGradVector[refCount] = math::sqrt(math::pow(eSpaceTimeSpaceGradVector[refCount], 2) + math::pow(eTVector[refCount], 2));
+        eFullSpaceTimeSpaceGradVector[refCount] = math::sqrt(math::pow(eSpaceTimeSpaceGradVector[refCount], 2)
+                                                             + math::pow(eTVector[refCount], 2));
+        // || e ||_{s, loc}
+        eFullSpaceTimeFullLocVector[refCount]       = (math::pow(eSpaceTimeSpaceGradVector[refCount], 2)
+                                                             + math::pow(eTVector[refCount], 2)
+                                                             + 0.5 * (math::pow(eSpaceTimeDtDeltaKVector[refCount], 2)
+                                                                      - math::pow(eSpaceTimeDeltaxDeltaKVector[refCount], 2)));
+        // || e ||_{s, loc} - 0.5 sum delta_K || Delta_x e||
+        eFullSpaceTimeLocVector[refCount]       = math::sqrt(math::pow(eSpaceTimeSpaceGradVector[refCount], 2)
+                                                             + math::pow(eTVector[refCount], 2)
+                                                             + 0.5 * math::pow(eSpaceTimeDtDeltaKVector[refCount], 2));
 
-        testSpaceTime.gsLogRefinementIterationErrorReport(refCount, theta, hmaxVector, hminVector,
+        testSpaceTime.gsLogRefinementIterationErrorReport(refCount, hmaxVector, hminVector,
                                                           eL2Vector, eH1Vector,
                                                           eSpaceTimeSpaceGradVector, eFullSpaceTimeSpaceGradVector,
-                                                          eSpaceTimeVector, eFullSpaceTimeVector,
+                                                          eSpaceTimeVector, eFullSpaceTimeVector, eFullSpaceTimeLocVector,
                                                           eSpaceTimeSolOperVector, eFullSpaceTimeSolOperVector,
                                                           eIdentVector, eFullIdentVector,
                                                           gradxe0Vector, gradxeTVector, e0Vector, eTVector, ehSigmaTVector);
@@ -549,7 +590,7 @@ int main(int argc, char *argv[])
                                                              mpV, v, mpW, w,
                                                              stopcritVector,
                                                              fFunc, uFunc, fL2NormSq,
-                                                             hmaxVector, hminVector, theta,
+                                                             hmaxVector, hminVector,
                                                              timeAsmbDivDivY, timeAsmbMMY, timeAsmbY, timeSolvY,
                                                              timeAsmbMajorant, timeAsmbDeltaHMajorant, timeAsmbMajorantII,
                                                              majVector, mdVector, meqVector, majhVector, majIIVector, majIIGapVector,
@@ -596,7 +637,7 @@ int main(int argc, char *argv[])
         // Log and plotToParaview the results
         testSpaceTime.gsLogRefinementIterationInfo(refCount, vDOFs, yDOFs, wDOFs,
                                                    eH1Vector, eL2Vector,
-                                                   eFullSpaceTimeVector, eSpaceTimeSpaceGradVector, eFullSpaceTimeSpaceGradVector, eFullSpaceTimeSolOperVector,
+                                                   eFullSpaceTimeLocVector, eSpaceTimeSpaceGradVector, eFullSpaceTimeSpaceGradVector, eFullSpaceTimeSolOperVector,
                                                    relErrorVector, relError0Vector, thetaVector, stopcritVector,
                                                    majVector, majhVector, majIIVector, majIIGapVector, minVector,
                                                    etaVector, eFullIdentVector);
@@ -656,7 +697,7 @@ int main(int argc, char *argv[])
                                    timeAsmbH1Error, timeAsmbSpaceTimeSolOperError, timeAsmbSpaceTimeDeltaxError, timeAsmbSpaceTimeDtError,
                                    timeAsmbMajorant, timeAsmbDeltaHMajorant, timeAsmbMajorantII, timeAsmbEtaIndicator, timeAsmbSpaceTimeErrorIdentity,
                                    eL2Vector, eH1Vector,
-                                   eFullSpaceTimeVector, eSpaceTimeSpaceGradVector, eFullSpaceTimeSpaceGradVector, eFullSpaceTimeSolOperVector, eSpaceTimeDeltaxVector, eSpaceTimeDtVector,
+                                   eFullSpaceTimeLocVector, eSpaceTimeSpaceGradVector, eFullSpaceTimeSpaceGradVector, eFullSpaceTimeSolOperVector, eSpaceTimeDeltaxVector, eSpaceTimeDtVector,
                                    relErrorVector, relError0Vector,
                                    majVector, mdVector, meqVector, majhVector, majIIVector, majIIGapVector, minVector, etaVector, eIdentVector);
 

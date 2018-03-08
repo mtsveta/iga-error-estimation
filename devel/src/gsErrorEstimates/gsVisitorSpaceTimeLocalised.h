@@ -40,7 +40,6 @@ namespace gismo
             const gsPoissonHeterogeneousPde<T>* pde_ptr
                     = static_cast<const gsPoissonHeterogeneousPde<T>*>(&pde);
             rhs_ptr = pde_ptr->rhs();
-            theta_ptr = pde_ptr->diffusion();
         }
 
         void initialize(const gsBasis<T> & basis,
@@ -78,7 +77,6 @@ namespace gismo
             // evaluated in parametric(true) or physical (false)
             rhs_ptr->eval_into( (paramCoef ?  quNodes :  geoEval.values() ), rhsVals );
             // Evaluate the coefficient, we know that it is the expression
-            theta_ptr->eval_into( geoEval.values(), thetaVals );
 
             // Initialize local matrix/rhs
             localMat.setZero(numActive, numActive      );
@@ -105,6 +103,7 @@ namespace gismo
 
             gsMatrix<T> localMat_, localRhs_;
             gsMatrix<T> upwindFunc, upwindSpaceGradFunc;
+            gsMatrix<T> approxSpaceLaplace;
 
             // look over the number of evaluation points
             for (index_t k = 0; k < quWeights.rows(); ++k) // loop over quadrature nodes
@@ -143,10 +142,16 @@ namespace gismo
                 // [ dt B1 ... dt BN ]
 
                 ph_basisTimeGrad      = ph_basisGrad.bottomRows(1);
+                ph_basisMixedDeriv  = ph_basisDeriv2.rightCols(d-1);
                 ph_basisSpace2ndDeriv = ph_basisDeriv2.leftCols(d-1);
                 ph_basisSpaceLaplace  = ph_basisSpace2ndDeriv * ones;
 
-                T h_k     = element.getCellSize();
+
+                //gsInfo << "ph_basisSpace2ndDeriv : \n" << ph_basisSpace2ndDeriv << "\n";
+                //gsInfo << "ones : \n" << ones << "\n";
+                //gsInfo << "ph_basisSpaceLaplace : \n" << ph_basisSpaceLaplace << "\n";
+
+                T h_K     = element.getCellSize();
                 T C_invK  = 1;
                 T theta_K = h_K / ( d * math::pow(C_invK, 2));
                 T delta_K = theta_K * h_K;
@@ -210,27 +215,26 @@ namespace gismo
                     gsInfo << "ph_basisMixedDeriv = \n [dxdz B1 dydz B1] \n [dxdz B2 dydz B2] \n [dxdz B3 dydz B3] \n ... \n [dxdz BN dydz BN] = \n " // is a NumActive x (d - 1) matrix
                            << ph_basisMixedDeriv << "\n\n";
                 gsInfo << "----------------------- \n\n";
-                gsInfo << "h : " << h << "\n";
-                gsInfo << "theta : " << theta << "\n";
+                gsInfo << "h_K : " << h_K << "\n";
+                gsInfo << "theta_K : " << theta_K << "\n";
                 gsInfo << "----------------------- \n\n";
                 gsInfo << "ph_basisMixedDeriv * ph_basisSpaceGrad : \n" << ph_basisMixedDeriv * ph_basisSpaceGrad << "\n\n";
                 gsInfo << "rhsVals.col(k) : \n" << rhsVals.col(k) << "\n\n";
-                gsInfo << "(v + delta * dt v)_[1 x N] : \n" << upwindFunc << "\n\n";
-                gsInfo << "(grad_x (v + delta * dt v))_[2 x N] : \n" << upwindSpaceGradFunc << "\n\n";
-                gsInfo << "(dt v * (v + delta * dt v))_[N x N] : \n" << upwindFunc.transpose() * ph_basisTimeGrad << "\n\n";
-                gsInfo << "(grad_x v * grad_x (v + delta * dt v))_[N x N] : \n" << upwindSpaceGradFunc.transpose() * ph_basisSpaceGrad << "\n\n";
+                gsInfo << "(v + delta_K * dt v)_[1 x N] : \n" << upwindFunc << "\n\n";
+                gsInfo << "(grad_x (v + delta_K * dt v))_[2 x N] : \n" << upwindSpaceGradFunc << "\n\n";
+                gsInfo << "(dt v * (v + delta_K * dt v))_[N x N] : \n" << upwindFunc.transpose() * ph_basisTimeGrad << "\n\n";
+                gsInfo << "(grad_x v * grad_x (v + delta_K * dt v))_[N x N] : \n" << upwindSpaceGradFunc.transpose() * ph_basisSpaceGrad << "\n\n";
+                gsInfo << "grad_x v * grad_x v: \n" <<  ph_basisSpaceGrad.transpose() * ph_basisSpaceGrad << "\n\n";
+                gsInfo << "( - delta_K * v_t)' * Laplace_x v' : \n" << - delta_K * ph_basisTimeGrad.transpose() * ph_basisSpaceLaplace.transpose() << "\n\n";
+                gsInfo << "Laplace_x v * ( - delta_K * v_t): \n" << - delta_K * ph_basisSpaceLaplace * ph_basisTimeGrad << "\n\n";
                 */
-
                 // u_t * v + grad_x u * grad_x v +
                 // dt ([vh_1 ... vh_N]^T) * [vh_1 + theta * h * dt vh_1,  .... , vh_N + theta * h * dt vh_N]
                 // + grad_x ([vh_1 ... vh_N]^T) * grad_x ([vh_1 + theta * h * dt vh_1,  .... , vh_N + theta * h * dt vh_N])
                 // [N x 1] * [1 x N] + [N * (d-1)] * [(d-1) * N]
-                localMat.noalias() += weight * ( upwindFunc.transpose() * ph_basisTimeGrad                              // (v + delta_K * v_t) * u_t
-                                                 + ph_basisSpaceGrad.transpose() * ph_basisSpaceGrad                    // grad_x v * grad_x u
-                                                 - delta_h * ph_basisTimeGrad.transpose() * ph_basisSpaceLaplace);      // ( - delta_K * v_t) * Laplace_x u
-                //localMat.noalias() += weight * ( upwindFunc.transpose() * ph_basisTimeGrad
-                //                                 + ph_basisSpaceGrad.transpose() * upwindSpaceGradFunc);
-
+                localMat.noalias() += weight * ( upwindFunc.transpose() * ph_basisTimeGrad                              // (v + delta_K * v_t) * v_t
+                                                 + ph_basisSpaceGrad.transpose() * ph_basisSpaceGrad                    // grad_x v * grad_x v
+                                                 - delta_K * ph_basisTimeGrad.transpose() * ph_basisSpaceLaplace.transpose());      // ( - delta_K * v_t) * Laplace_x v
                 // [f_1 .. f_N]^T * [vh_1 + theta * h * dt vh_1,  .... , vh_N + theta * h * dt vh_N]
                 // ([1 x 1] * [N x 1])^T = [1 x N]
                 localRhs.noalias() += weight * ( (rhsVals.col(k) * upwindFunc).transpose()) ;
@@ -277,7 +281,6 @@ namespace gismo
     protected:
         // Right hand side
         const gsFunction<T> * rhs_ptr;
-        const gsFunction<T> * theta_ptr;
 
     protected:
         // Basis values
@@ -292,7 +295,6 @@ namespace gismo
     protected:
         // Local values of the right hand side
         gsMatrix<T> rhsVals;
-        gsMatrix<T> thetaVals;
         boxSide side1;
 
     protected:

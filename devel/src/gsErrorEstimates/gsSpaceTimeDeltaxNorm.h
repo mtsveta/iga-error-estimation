@@ -1,6 +1,6 @@
-/** @file gsSpaceTimeSolOperNorm.h
+/** @file gsSpaceTimeDeltaxNorm.h
 
-    @brief Computes the Space-Time norm.
+    @brief Computes the || Delta_x u || norm.
 
     This file is part of the G+Smo library.
 
@@ -8,7 +8,7 @@
     License, v. 2.0. If a copy of the MPL was not distributed with this
     file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-    Author(s): S. Moore
+    Author(s): S. Matculevich
 */
 
 #include<gsAssembler/gsNorm.h>

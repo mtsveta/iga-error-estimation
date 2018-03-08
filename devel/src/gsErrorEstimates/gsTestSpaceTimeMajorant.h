@@ -77,21 +77,57 @@ namespace gismo {
                                           gsMatrix<double> &, int, int, gsVector<index_t> &,
                                           gsVector<real_t> & );
 
-        void gsRecontructMajorantBasedOnOptimalFlux(int, gsMultiBasis<real_t> &, int,
-                                                    gsMatrix<real_t> &, gsMultiPatch<real_t> &, gsVector<index_t> &,
-                                                    const gsMultiPatch<real_t> &, const gsField<> &,
-                                                    const gsMultiPatch<real_t> &, const gsField<> &,
+        void gsRecontructMajorantBasedOnOptimalFlux(int refCounter, gsMultiBasis<real_t> &basisY, int yDegree,
+                                                    gsMatrix<real_t> &yVector, gsMultiPatch<real_t> &mpY,
+                                                    gsVector<index_t> &yDOFs,
+                                                    const gsMultiPatch<real_t> &mpV, const gsField<> &v,
+                                                    const gsMultiPatch<real_t> &mpW, const gsField<> &w,
                                                     gsVector<real_t> &stopcritVector,
-                                                    const gsFunctionExpr<real_t> &, const gsFunctionExpr<real_t> &, real_t,
-                                                    gsVector<real_t> &, gsVector<real_t> &, real_t,
-                                                    gsVector<double> &, gsVector<double> &, gsVector<double> &, gsMatrix<double> &, gsVector<double> &, gsVector<double> &, gsVector<double> &,
-                                                    gsVector<real_t> &, gsVector<real_t> &, gsVector<real_t> &, gsVector<real_t> &, gsVector<real_t> &, gsVector<real_t> &,
-                                                    std::vector<real_t> &,
-                                                    std::vector<real_t> &,
-                                                    const gsVector<real_t>& e0,
-                                                    int,
-                                                    gsSpaceTimeAssembler<real_t> &,
-                                                    std::vector<patchSide> &, std::vector<patchSide> &);
+                                                    const gsFunctionExpr<real_t> &fFunc, const gsFunctionExpr<real_t> &uFunc, real_t fL2NormSq,
+                                                    gsVector<real_t> &hmaxVector, gsVector<real_t> &hminVector,
+                                                    gsVector<double> &timeAsmblDivDivY,
+                                                    gsVector<double> &timeAsmblVectMassY,
+                                                    gsVector<double> &timeAsmblY,
+                                                    gsMatrix<double> &timeSolvY,
+                                                    gsVector<double> &timeAsmblMaj, gsVector<double> &timeAsmblDeltaHMaj, gsVector<double> &timeAsmblMajII,
+                                                    gsVector<real_t> &majVector,
+                                                    gsVector<real_t> &mdVector,
+                                                    gsVector<real_t> &meqVector,
+                                                    gsVector<real_t> &majhVector,
+                                                    gsVector<real_t> &majIIVector, gsVector<real_t> &majIIGapVector,
+                                                    std::vector<real_t> &mdDistr, std::vector<real_t> &mIIdDistr,
+                                                    const gsVector<real_t>& e0Vector,
+                                                    int elemNum,
+                                                    gsSpaceTimeAssembler<real_t> &spaceTimeAssembler,
+                                                    std::vector<patchSide> &topSides,
+                                                    std::vector<patchSide> &bottomSides, real_t theta);
+        /*
+        int refCounter,
+                gsMultiBasis<real_t> &basisY, int yDegree,
+                gsMatrix<real_t> &yVector, gsMultiPatch<real_t> &mpY,
+                gsVector<index_t> &yDOFs,
+        const gsMultiPatch<real_t> &mpV, const gsField<> &v,
+        const gsMultiPatch<real_t> &mpW, const gsField<> &w,
+                gsVector<real_t> &stopcritVector,
+        const gsFunctionExpr<real_t> &fFunc, const gsFunctionExpr<real_t> &uFunc, real_t fL2NormSq,
+                gsVector<real_t> &hmaxVector, gsVector<real_t> &hminVector,
+                gsVector<double> &timeAsmblDivDivY,
+        gsVector<double> &timeAsmblVectMassY,
+                gsVector<double> &timeAsmblY,
+        gsMatrix<double> &timeSolvY,
+                gsVector<double> &timeAsmblMaj, gsVector<double> &timeAsmblDeltaHMaj, gsVector<double> &timeAsmblMajII,
+        gsVector<real_t> &majVector,
+                gsVector<real_t> &mdVector,
+        gsVector<real_t> &meqVector,
+                gsVector<real_t> &majhVector,
+        gsVector<real_t> &majIIVector, gsVector<real_t> &majIIGapVector,
+        std::vector<real_t> &mdDistr, std::vector<real_t> &mIIdDistr,
+        const gsVector<real_t>& e0Vector,
+        int elemNum,
+                gsSpaceTimeAssembler<real_t> &spaceTimeAssembler,
+        std::vector<patchSide> &topSides,
+                std::vector<patchSide> &bottomSides, real_t theta
+    */
 
 /*
         void gsRecontructMajorantBasedOnEquilibratedFlux(int, gsMultiBasis<real_t> &, int,
@@ -209,7 +245,7 @@ namespace gismo {
 
         void gsLogAssemblingSolvingTime(gsVector<double> &, gsVector<double> &, int);
 
-        void gsLogRefinementIterationErrorReport(const int refCount, const real_t theta, const gsVector<real_t> & hmaxVector, const gsVector<real_t> & hminVector,
+        void gsLogRefinementIterationErrorReport(const int refCount, const gsVector<real_t> & hmaxVector, const gsVector<real_t> & hminVector,
                                                const gsVector<real_t> & eL2Vector, const gsVector<real_t> & eH1Vector,
                                                const gsVector<real_t> & eSpaceTimeSpaceGradVector, const gsVector<real_t> & eFullSpaceTimeSpaceGradVector,
                                                const gsVector<real_t> & eSpaceTimeVector, const gsVector<real_t> & eFullSpaceTimeVector,
@@ -928,6 +964,9 @@ namespace gismo {
         timeAsmb[refCounter] = clock.stop();
     }
 */
+
+
+
     template<unsigned d>
     void gsTestSpaceTimeMajorant<d>::gsRecontructMajorantBasedOnOptimalFlux(int refCounter,
                                                                             gsMultiBasis<real_t> &basisY, int yDegree,
@@ -937,7 +976,7 @@ namespace gismo {
                                                                             const gsMultiPatch<real_t> &mpW, const gsField<> &w,
                                                                             gsVector<real_t> &stopcritVector,
                                                                             const gsFunctionExpr<real_t> &fFunc, const gsFunctionExpr<real_t> &uFunc, real_t fL2NormSq,
-                                                                            gsVector<real_t> &hmaxVector, gsVector<real_t> &hminVector, real_t theta,
+                                                                            gsVector<real_t> &hmaxVector, gsVector<real_t> &hminVector,
                                                                             gsVector<double> &timeAsmblDivDivY,
                                                                             gsVector<double> &timeAsmblVectMassY,
                                                                             gsVector<double> &timeAsmblY,
@@ -953,7 +992,7 @@ namespace gismo {
                                                                             int elemNum,
                                                                             gsSpaceTimeAssembler<real_t> &spaceTimeAssembler,
                                                                             std::vector<patchSide> &topSides,
-                                                                            std::vector<patchSide> &bottomSides) {
+                                                                            std::vector<patchSide> &bottomSides, real_t theta) {
 
         gsCPUStopwatch clock_, clock;
 
@@ -977,6 +1016,7 @@ namespace gismo {
         gsInfo << "---------------------------------------------------------------------------------\n";
 
         clock.restart();
+
         #pragma omp parallel sections
         {
             #pragma omp section
@@ -1874,7 +1914,7 @@ namespace gismo {
     }
 
     template<unsigned d>
-    void gsTestSpaceTimeMajorant<d>::gsLogRefinementIterationErrorReport(const int refCount, const real_t theta, const gsVector<real_t> & hmaxVector, const gsVector<real_t> & hminVector,
+    void gsTestSpaceTimeMajorant<d>::gsLogRefinementIterationErrorReport(const int refCount, const gsVector<real_t> & hmaxVector, const gsVector<real_t> & hminVector,
                                                                        const gsVector<real_t> & eL2Vector, const gsVector<real_t> & eH1Vector,
                                                                        const gsVector<real_t> & eSpaceTimeSpaceGradVector, const gsVector<real_t> & eFullSpaceTimeSpaceGradVector,
                                                                        const gsVector<real_t> & ehQVector, const gsVector<real_t> & eFullSpaceTimeVector,
@@ -1892,7 +1932,7 @@ namespace gismo {
 
         gsInfo << "|| e ||_{s, h, Q}   = " << ehQVector[refCount] << "\n";
         gsInfo << "|| e ||_{s, h, T}   = " << ehSigmaTVector[refCount] << "\n";
-        gsInfo << "(|| e ||^2_T + theta * h * || grad_x e ||^2_T)^1/2   = " << math::sqrt(math::pow(eTVector[refCount], 2) + theta * hminVector[refCount] * math::pow(gradxeTVector[refCount], 2)) << "\n";
+        //gsInfo << "(|| e ||^2_T + theta * h * || grad_x e ||^2_T)^1/2   = " << math::sqrt(math::pow(eTVector[refCount], 2) + theta * hminVector[refCount] * math::pow(gradxeTVector[refCount], 2)) << "\n";
         gsInfo << "(|| e ||^2_{s, h, Q} + || e ||^2_T + theta * h * || grad_x e ||^2_T)^1/2 = " << eFullSpaceTimeVector[refCount] << "\n";
         gsInfo << "(|| e ||^2_{s, h, Q} + || e ||^2_{s, h, T})^1/2 = " << math::sqrt(math::pow(ehQVector[refCount], 2) + math::pow(ehSigmaTVector[refCount], 2)) << "\n\n";
 
@@ -1907,7 +1947,6 @@ namespace gismo {
         gsInfo << "|| grad_x e ||_0 = " << gradxe0Vector[refCount] << "\n";
         gsInfo << "|| grad_x e ||_T = " << gradxeTVector[refCount] << "\n\n";
 
-        gsInfo << "theta = " << theta << "\n";
         gsInfo << "hmax = " << hmaxVector[refCount] << "\n";
         gsInfo << "hmin = " << hminVector[refCount] << "\n\n";
 

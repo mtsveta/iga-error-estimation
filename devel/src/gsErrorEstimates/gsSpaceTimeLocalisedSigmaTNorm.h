@@ -18,7 +18,6 @@ namespace gismo
                               const gsFunction<T> & _func2,
                               const std::vector<boundaryInterface>& SliceInterfaces,
                               const std::vector<patchSide>& TopSides,
-                              const T & theta,
                               bool _f2param = false)
                 :gsNorm<T>(_field1,_func2), m_sliceInterfaces(SliceInterfaces), m_sides(TopSides), f2param(_f2param)
         {}
@@ -28,7 +27,6 @@ namespace gismo
                               const gsFunction<T> & _dfunc2,
                               const std::vector<boundaryInterface>& SliceInterfaces,
                               const std::vector<patchSide>& TopSides,
-                              const T & theta,
                               bool _f2param = false)
                 : gsNorm<T>(_field1,_func2), m_sliceInterfaces(SliceInterfaces), m_sides(TopSides), f2param(_f2param)
         {}
@@ -37,7 +35,6 @@ namespace gismo
         gsSpaceTimeLocalisedSigmaTNorm(const gsField<T> & _field1,
                               const std::vector<boundaryInterface>& SliceInterfaces,
                               const std::vector<patchSide>& TopSides,
-                              const T & theta,
                               bool _f2param = false)
                 : gsNorm<T>(_field1), m_sliceInterfaces(SliceInterfaces), m_sides(TopSides), f2param(_f2param)
         {}

@@ -27,7 +27,7 @@ namespace gismo
     It inherits from the gsPoissonAssembler
 */
     template <class T>
-    class gsSpaceTimeAssembler: public gsAssembler<T>
+    class gsSpaceTimeLocalisedAssembler: public gsAssembler<T>
     {
     public:
         typedef gsAssembler<T> Base;
@@ -45,18 +45,7 @@ namespace gismo
     \param[in] dirStrategy option for the treatment of Dirichlet boundary in the \em bconditions object.
     \param[in] intStrategy option for the treatment of patch interfaces
 */
-        gsSpaceTimeAssembler( gsMultiPatch<T> const         & patches,
-                              gsMultiBasis<T> const         & bases,
-                              gsBoundaryConditions<T> const & bconditions,
-                              const gsFunction<T>           & rhs,
-                              const gsFunction<T>           & theta)
-        {
-            typename gsPde<T>::Ptr pde( new gsPoissonHeterogeneousPde<T>(patches,bconditions,rhs,theta) );
-            Base::initialize(pde, bases, m_options);
-
-        }
-
-        gsSpaceTimeAssembler( gsMultiPatch<T> const         & patches,
+        gsSpaceTimeLocalisedAssembler( gsMultiPatch<T> const         & patches,
                               gsMultiBasis<T> const         & bases,
                               gsBoundaryConditions<T> const & bconditions,
                               const gsFunction<T>           & rhs)
@@ -66,10 +55,10 @@ namespace gismo
 
         }
 
-        gsSpaceTimeAssembler() : Base() {
+        gsSpaceTimeLocalisedAssembler() : Base() {
         }
 
-        virtual ~gsSpaceTimeAssembler() { }
+        virtual ~gsSpaceTimeLocalisedAssembler() { }
 
         void refresh()
         {

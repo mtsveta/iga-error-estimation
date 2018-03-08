@@ -539,7 +539,7 @@ int main(int argc, char *argv[])
         // [e]
         eFullSpaceTimeSpaceGradVector[refCount] = math::sqrt(math::pow(eSpaceTimeSpaceGradVector[refCount], 2) + math::pow(eTVector[refCount], 2));
 
-        testSpaceTime.gsLogRefinementIterationErrorReport(refCount, theta, hmaxVector, hminVector,
+        testSpaceTime.gsLogRefinementIterationErrorReport(refCount, hmaxVector, hminVector,
                                                           eL2Vector, eH1Vector,
                                                           eSpaceTimeSpaceGradVector, eFullSpaceTimeSpaceGradVector,
                                                           eSpaceTimeVector, eFullSpaceTimeVector,
@@ -560,14 +560,14 @@ int main(int argc, char *argv[])
                                                                 mpV, v, mpW, w,
                                                                 stopcritVector,
                                                                 fFunc, uFunc, fL2NormSq,
-                                                                hmaxVector, hminVector, theta,
+                                                                hmaxVector, hminVector,
                                                                 timeAsmbDivDivY, timeAsmbMMY, timeAsmbY, timeSolvY,
                                                                 timeAsmbMajorant, timeAsmbDeltaHMajorant, timeAsmbMajorantII,
                                                                 majVector, mdVector, meqVector, majhVector, majIIVector, majIIGapVector,
                                                                 mdDistr, mIIdDistr,
                                                                 e0Vector,
                                                                 elemNumber,
-                                                                spaceTimeAssemblerV, topSides, bottomSides);
+                                                                spaceTimeAssemblerV, topSides, bottomSides, theta);
 
         if (refCount > 0) {
             thetaVector[refCount-1]    = eH1Vector[refCount] / eH1Vector[refCount-1];

@@ -1,4 +1,4 @@
-/** @file gsSpaceTimeNorm.h
+/** @file gsSpaceTimeLocalisedNorm.h
 
     @brief Computes the Space-Time norm.
 
@@ -24,32 +24,23 @@ namespace gismo
  * \ingroup Assembler
 */
     template <class T>
-    class gsSpaceTimeNorm : public gsNorm<T>
+    class gsSpaceTimeLocalisedNorm : public gsNorm<T>
     {
         friend  class gsNorm<T>;
         typedef typename gsMatrix<T>::RowsBlockXpr Rows;
 
     public:
 
-        gsSpaceTimeNorm(const gsField<T> & _field1,
+        gsSpaceTimeLocalisedNorm(const gsField<T> & _field1,
                         const gsFunction<T> & _func2,
                         bool _f2param = false)
-                : gsNorm<T>(_field1, _func2), thetaFunc(NULL), f2param(_f2param)
+                : gsNorm<T>(_field1, _func2), f2param(_f2param)
         {
 
         }
 
-        gsSpaceTimeNorm(const gsField<T> & _field1,
-                        const gsFunction<T> & _func2,
-                        const gsFunction<T> & _thetaFunc,
-                        bool _f2param = false)
-                : gsNorm<T>(_field1,_func2), thetaFunc(&_thetaFunc), f2param(_f2param)
-        {
-
-        }
-
-        gsSpaceTimeNorm(const gsField<T> & _field1)
-                : gsNorm<T>(_field1), thetaFunc(NULL), f2param(false)
+        gsSpaceTimeLocalisedNorm(const gsField<T> & _field1)
+                : gsNorm<T>(_field1), f2param(false)
         { }
 
     public:
@@ -88,7 +79,6 @@ namespace gismo
         {
             // Evaluate first function
             func1.deriv_into(quNodes, f1ders);
-            thetaFunc->eval_into(quNodes, thetaVals);
 
             // Evaluate second function (defined of physical domain)
             geoEval.evaluateAt(quNodes);
@@ -138,12 +128,11 @@ namespace gismo
         inline T takeRoot(const T v) { return math::sqrt(v);}
 
     private:
-        const gsFunction<T>* thetaFunc; // If this is NULL a numerical approximation will be used
 
         using gsNorm<T>::m_value;
         using gsNorm<T>::m_elWise;
 
-        gsMatrix<T> f1ders, f2ders, thetaVals;
+        gsMatrix<T> f1ders, f2ders;
         gsMatrix<T> f1pders;
         gsVector<T> unormal;
 

@@ -1,6 +1,6 @@
-/** @file gsSpaceTimeSolOperNorm.h
+/** @file gsSpaceTimeDtNorm.h
 
-    @brief Computes the Space-Time norm.
+    @brief Computes the || \partial_t e ||  norm.
 
     This file is part of the G+Smo library.
 
