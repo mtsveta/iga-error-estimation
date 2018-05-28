@@ -142,7 +142,7 @@ int main(int argc, char *argv[])
     // Initialize arrays to DOFs for v and y on each refinement step
     gsVector<index_t> vDOFs(numTotalAdaptRef), yDOFs(numTotalAdaptRef), wDOFs(numTotalAdaptRef);
     // Initialize vectors with assembling and computation times on each refinement step
-    gsVector<double> timeAsmbV(numTotalAdaptRef),
+    gsVector<real_t> timeAsmbV(numTotalAdaptRef),
             timeAsmbDivDivY(numTotalAdaptRef), timeAsmbMMY(numTotalAdaptRef), timeAsmbY(numTotalAdaptRef), timeAsmbW(numTotalAdaptRef),
             timeAsmbError(numTotalAdaptRef), timeAsmbMajorant(numTotalAdaptRef), timeAsmbMinorant(numTotalAdaptRef), timeAsmbEtaIndicator(numTotalAdaptRef),
             timeAsmbEquilY(numTotalAdaptRef);
@@ -150,7 +150,7 @@ int main(int argc, char *argv[])
     // matrix are used since we compare the performance of different solvers
     // [0] is the direct solver
     // [1] is the iterative solver
-    gsMatrix<double> timeSolvV(numTotalAdaptRef, numOfSolvers),
+    gsMatrix<real_t> timeSolvV(numTotalAdaptRef, numOfSolvers),
             timeSolvY(numTotalAdaptRef, numOfSolvers),
             timeSolvW(numTotalAdaptRef, numOfSolvers),
             timeSolvEquilY(numTotalAdaptRef, numOfSolvers);
@@ -403,8 +403,7 @@ int main(int argc, char *argv[])
         if (refCount <= numTotalAdaptRef - 1) {
             testMajorant.gsSaveToFileRefinementIterationInfo(saveToFile,
                                                              v, poissonAssembler.multiBasis(),
-                                                             edDistr, mdDistr, etaDistr,
-                                                             refCount, numTotalAdaptRef);
+                                                             edDistr, mdDistr, refCount);
         }
         //! [Refine]
         if (refCount < numTotalAdaptRef - 1) {

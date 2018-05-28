@@ -32,7 +32,7 @@
 #pragma once
 
 #include <gsAssembler/gsGaussRule.h>
-#include <gsErrorEstimates/gsDivPde.h>
+#include "gsDivPdeRhsFVt.h"
 
 namespace gismo
 {
@@ -45,7 +45,7 @@ namespace gismo
         /** \brief Constructor for gsVisitorSpaceTimeDivDiv.*/
         gsVisitorDivDivSpaceTimeMh(const gsPde<T> & pde)
         {
-            pde_ptr = static_cast<const gsDivPde<T>*>(&pde);
+            pde_ptr = static_cast<const gsDivPdeRhsFVt<T>*>(&pde);
         }
 
         void initialize(const gsBasis<T> & basis,
@@ -246,7 +246,7 @@ namespace gismo
 
     protected:
         // Pointer to the pde data
-        const gsDivPde<T> * pde_ptr;
+        const gsDivPdeRhsFVt<T> * pde_ptr;
 
     protected:
         // Basis values

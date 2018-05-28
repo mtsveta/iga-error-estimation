@@ -14,19 +14,24 @@
 #include <gismo.h>
 
 #include <gsErrorEstimates/gsSpaceTimeAssembler.h>
+
+#include <gsErrorEstimates/gsTestSpaceTimeMajorant.h>
+
+#include <gsErrorEstimates/gsErrEstSpaceTimeIdentity.h>
+#include <gsErrorEstimates/gsErrEstSpaceTimeMinorant.h>
+#include <gsErrorEstimates/gsErrEstSpaceTimeResidual.h>
+
 #include <gsErrorEstimates/gsSpaceTimeNorm.h>
 #include <gsErrorEstimates/gsSpaceTimeSigmaTNorm.h>
 #include <gsErrorEstimates/gsSpaceTimeSliceNorm.h>
 #include <gsErrorEstimates/gsSpaceTimeSpaceGradSliceNorm.h>
-#include <gsErrorEstimates/gsErrEstSpaceTimeResidual.h>
-#include <gsErrorEstimates/gsTestSpaceTimeMajorant.h>
-#include <gsErrorEstimates/gsNormFields.h>
 #include <gsErrorEstimates/gsSpaceTimeSpaceGradNorm.h>
 #include <gsErrorEstimates/gsSpaceTimeSolOperNorm.h>
 #include <gsErrorEstimates/gsSpaceTimeDeltaxNorm.h>
 #include <gsErrorEstimates/gsSpaceTimeDtNorm.h>
-#include <gsErrorEstimates/gsSpaceTimeErrorIdentity.h>
-#include <gsErrorEstimates/gsErrEstSpaceTimeMinorant.h>
+
+#include <gsErrorEstimates/gsNormFields.h>
+
 #include <gsAssembler/gsAdaptiveRefUtils.h>
 
 using namespace gismo;
@@ -72,11 +77,11 @@ int main(int argc, char *argv[])
 
     // Define test-case parameters (number and dimension)
     const unsigned
-    exampleNumber(2), d(2);        // 2 example: 2d unit square, u = (1 - x)*x*x*(1 - t)*t
+    // exampleNumber(2), d(2);        // 2 example: 2d unit square, u = (1 - x)*x*x*(1 - t)*t
     // exampleNumber(3), d(2);        // 3 example: 2d unit square, u = sin(pi*x)*sin(pi*t)
     // exampleNumber(4), d(2);        // 4 example: 2d unit square, u = sin(6.0*pi*x)*sin(3.0*pi*t)
     // exampleNumber(5), d(2);        // 5 example: 2d unit square, u = cos(x)*exp(t)
-    // exampleNumber(6), d(2);        // 6 example: 2d unit square, u = (x^2 - x) * (y^2 - y) * exp(-100 * ((x - 0.8)^2 + (y - 0.05)^2))
+    exampleNumber(6), d(2);        // 6 example: 2d unit square, u = (x^2 - x) * (y^2 - y) * exp(-100 * ((x - 0.8)^2 + (y - 0.05)^2))
     // exampleNumber(7), d(2);        // 7 example: 2d rectangle $(0, 2) x (0, 1)$, u = (2 - x)*x*x*(1 - y)*y
     // exampleNumber(8), d(2);        // 8 example: 2d rectangle $(0, 2) x (0, 1)$, u = (x^2 - 2*x) * (y^2 - y) * exp(-100 * ((x - 1.4)^2 + (y - 0.95)^2))
     // exampleNumber(9), d(2);     // 9 example: 2d rectangle (0, 1) x (0, 2), u = (x^2 + t^2)^(1.0/3.0) * sin(2.0/3.0*atan2(t,x) + pi)
@@ -117,7 +122,7 @@ int main(int argc, char *argv[])
                                              withMajorantEquilibration);
 
     // Init the degree of basis S^{p, p}, where p = vDegree
-    int vDegree(2), m(1), l(1);
+    int vDegree(2), m(7), l(7);
     // Init the degree of the basis for the flux: y \in S^{p + k, p + k} + S^{p + k, p + k}, p = vDegree
     // yDegree must be >= 2 to ensure that S^{p + k, p + k} + S^{p + k, p + k} \subset H(\Omega, div§)
     int yDegree(vDegree + m);
@@ -125,13 +130,13 @@ int main(int argc, char *argv[])
 
     // Setting up the refinement strategy
     // Number of initial uniform and total unif./adapt. refinement steps
-    unsigned int numInitUniformRefV(1), numInitUniformRefY(1), numInitUniformRefW(1), numTotalAdaptRef(8);
+    unsigned int numInitUniformRefV(5), numInitUniformRefY(5), numInitUniformRefW(5), numTotalAdaptRef(4);
 
     MarkingStrategy adaptRefCrit(BULK); // with alternatives GARU, PUCA, and BULK
     //MarkingStrategy adaptRefCrit(GARU);
-    real_t markingParamTheta(0.4);  // parameter theta in marking strategy
-    unsigned int yBasisRefDelay(5); // parameter for the delay in updating y_h basis for the refinement
-    unsigned int wBasisRefDelay(5); // parameter for the delay in updating w-h basis for the refinement
+    real_t markingParamTheta(0.6);  // parameter theta in marking strategy
+    unsigned int yBasisRefDelay(1); // parameter for the delay in updating y_h basis for the refinement
+    unsigned int wBasisRefDelay(1); // parameter for the delay in updating w-h basis for the refinement
 
     testSpaceTime.gsCreateResultsFolder(saveToFile, exampleNumber,
                                         vDegree, yDegree, wDegree, yBasisRefDelay, wBasisRefDelay,
@@ -228,7 +233,6 @@ int main(int argc, char *argv[])
             timeAsmbMinorant(numTotalAdaptRef),
             timeAsmbEtaIndicator(numTotalAdaptRef),
             timeAsmbEquilY(numTotalAdaptRef);
-
 
     int numOfSolvers = 2;
     // matrix are used since we compare the performance of different solvers
@@ -370,7 +374,7 @@ int main(int argc, char *argv[])
 
             #pragma omp section
             {
-                gsSpaceTimeErrorIdentity<real_t> eIdentity(v, * fForOMP[0]);
+                gsErrEstSpaceTimeIdentity<real_t> eIdentity(v, * fForOMP[0]);
                 testSpaceTime.gsCalculateDistribution(eIdentity, eIdentDistr, elemNumber,
                                                           eIdentVector, timeAsmbSpaceTimeErrorIdentity, refCount);
                 gsInfo << "t_{e/w} ( Id )               = " <<  timeAsmbSpaceTimeErrorIdentity[refCount] << " sec.\n";

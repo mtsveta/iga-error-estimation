@@ -7,7 +7,7 @@
     License, v. 2.0. If a copy of the MPL was not distributed with this
     file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-    Author(s): S. Matculevlocale -aich
+    Author(s): S. Matculevich
 */
 
 #include <iostream>
@@ -120,14 +120,14 @@ int main(int argc, char *argv[])
 
     gsVector<index_t> vDOFs(numTotalAdaptRef), yDOFs(numTotalAdaptRef);
     // Initialize vectors with assembling and computation times on each refinement step
-    gsVector<double> timeAsmbV(numTotalAdaptRef),
+    gsVector<real_t> timeAsmbV(numTotalAdaptRef),
             timeAsmbDivDivY(numTotalAdaptRef), timeAsmbMMY(numTotalAdaptRef), timeAsmbY(numTotalAdaptRef), timeSolvY(numTotalAdaptRef),
             timeAsmbError(numTotalAdaptRef), timeAsmbMajorant(numTotalAdaptRef), timeAsmbEtaIndicator(numTotalAdaptRef);
-    int numOfSolvers = 2;
     // matrix are used since we compare the performance of different solvers
     // [0] is the direct solver
     // [1] is the iterative solver
-    gsMatrix<double> timeSolvV(numTotalAdaptRef, numOfSolvers);
+    int numOfSolvers = 2;
+    gsMatrix<real_t> timeSolvV(numTotalAdaptRef, numOfSolvers);
     timeSolvV.setZero(numTotalAdaptRef, 2);
 
     gsVector<real_t> stopcritVector(numTotalAdaptRef-1);

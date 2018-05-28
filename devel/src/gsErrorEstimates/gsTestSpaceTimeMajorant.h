@@ -4,15 +4,20 @@
 #include <gsErrorEstimates/gsVisitorDivDivSpaceTime.h>
 #include <gsErrorEstimates/gsVisitorDivDivSpaceTimeMh.h>
 #include <gsErrorEstimates/gsVisitorDualPoissonSpaceTime.h>
+
 #include <gsErrorEstimates/gsErrEstEquilSpaceTimeMajorant.h>
 #include <gsErrorEstimates/gsErrEstDualSpaceTimeMajorant.h>
+#include <gsErrorEstimates/gsErrEstDivDualSpaceTimeMajorant.h>
+
 #include <gsErrorEstimates/gsErrEstDualSpaceTimeMajorantII.h>
 #include <gsErrorEstimates/gsErrEstFvwSpaceTimeMajorantII.h>
 #include <gsErrorEstimates/gsErrEstFvu0wSpaceTimeMajorantII.h>
 #include <gsErrorEstimates/gsErrEstResidualSigmaTSpaceTimeMajorantII.h>
-#include <gsErrorEstimates/gsErrEstDivDualSpaceTimeMajorant.h>
-//#include <gsErrorEstimates/gsSpaceGradSpaceTimePde.h>
+
 #include <gsErrorEstimates/gsErrEstMinorant.h>
+
+#include "gsErrorEstimates/gsDivPdeRhsFVt.h"
+
 #include <gsAssembler/gsAdaptiveRefUtils.h>
 #include <sys/stat.h>
 #include <fstream>
@@ -21,7 +26,6 @@
 #include <functional>
 #include <gsSolver/gsIterativeSolver.h>
 #include <gsSolver/gsSolverUtils.h>
-#include <gsErrorEstimates/gsDivPde.h>
 
 namespace gismo {
 
@@ -194,12 +198,12 @@ namespace gismo {
              */
 
         void gsGenerateDivMatrixRhs(int refCounter,
-                                    const gsDivPde<real_t> &divPde,
+                                    const gsDivPdeRhsFVt<real_t> &divPde,
                                     const gsMultiBasis<real_t> &basisY, int yDegree,
                                     gsVector<index_t> &yDOFs,
                                     gsAssembler<> &divdivAssembler,
                                     gsVector<double> &timeAsmblDivDivY);
-        void gsGenerateDivMatrixTwoRhs(int, const gsDivPde<real_t> &, const gsMultiBasis<real_t> &, int,
+        void gsGenerateDivMatrixTwoRhs(int, const gsDivPdeRhsFVt<real_t> &, const gsMultiBasis<real_t> &, int,
                                     gsVector<index_t> &yDOFs,
                                     gsAssembler<> &divdivAssembler,
                                     gsVector<double> &timeAsmblDivDivY);
@@ -360,7 +364,6 @@ namespace gismo {
     void gsTestSpaceTimeMajorant<d>::initGivenProblemData() {
 
         const double PI = 3.14159265359;
-        const int NUM_PATCHES = 1;
 
         // d is d_total = d_x + 1
         switch (d) {
@@ -371,8 +374,8 @@ namespace gismo {
                 if (exampleNumber == 2 || exampleNumber == 3 || exampleNumber == 4 ||
                         exampleNumber == 5 || exampleNumber == 6 || exampleNumber == 11 || exampleNumber == 12 ||
                         exampleNumber == 16) {
-                    real_t unit_side(1.0);
-                    patches = *gsNurbsCreator<>::BSplineSquareGrid(NUM_PATCHES, NUM_PATCHES, unit_side);
+                    real_t x0(0.0), y0(0.0), lx(1.0), ly(1.0);
+                    patches = *gsNurbsCreator<>::BSplineRectangle(x0, y0, lx, ly);
                     cFriedrichs = 1.0 / (math::sqrt((real_t) (dim - 1)) * PI);
                     domainName = "unit interval";
                 } else if (exampleNumber == 7 || exampleNumber == 8) {
@@ -452,7 +455,7 @@ namespace gismo {
                     //  G-shape domain (inscribed in unit cube)
                     // --------------------------------------------------------------------------------
                     std::string fileSrc = gsFileManager::find( "volumes/GshapedVolume.xml" );
-                    patches = static_cast<gsMultiPatch<> > (gsReadFile<real_t>(fileSrc));
+                    gsReadFile<real_t>(fileSrc, patches);
                     cFriedrichs = 1.0 / (math::sqrt((real_t) dim) * PI);
                     domainName = "G-shape domain";
 
@@ -1003,7 +1006,7 @@ namespace gismo {
         //const gsPiecewiseFunction<real_t> vPiece = mpW.piece(0); // Experiment of improving mEq in majorant
 
         // Initialize the BVP for the generating of the optimal y for the majorant
-        const gsDivPde<real_t> divPde(patches, freeBC, fFunc, vPiece);    // div(y) = f equation
+        const gsDivPdeRhsFVt<real_t> divPde(patches, freeBC, fFunc, vPiece);    // div(y) = f equation
         const gsPoissonPde<> dualPde(patches, *pfreeBC, vPiece);          // y = grad(v)
 
         // Initizlize assemblers
@@ -1535,7 +1538,7 @@ namespace gismo {
 
     template<unsigned d>
     void gsTestSpaceTimeMajorant<d>::gsGenerateDivMatrixRhs(int refCounter,
-                                                            const gsDivPde<real_t> &divPde,
+                                                            const gsDivPdeRhsFVt<real_t> &divPde,
                                                             const gsMultiBasis<real_t> &basisY, int yDegree,
                                                             gsVector<index_t> &yDOFs,
                                                             gsAssembler<> &divdivAssembler,

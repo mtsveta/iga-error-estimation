@@ -30,7 +30,7 @@
 #include <gsErrorEstimates/gsSpaceTimeDtNorm.h>
 #include <gsErrorEstimates/gsSpaceTimeDeltaxDeltaKNorm.h>
 #include <gsErrorEstimates/gsSpaceTimeDtDeltaKNorm.h>
-#include <gsErrorEstimates/gsSpaceTimeErrorIdentity.h>
+#include <gsErrorEstimates/gsErrEstSpaceTimeIdentity.h>
 #include <gsErrorEstimates/gsErrEstSpaceTimeMinorant.h>
 #include <gsAssembler/gsAdaptiveRefUtils.h>
 
@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
     // Define test-case parameters (number and dimension)
     const unsigned
     // exampleNumber(2), d(2);        // 2 example: 2d unit square, u = (1 - x)*x*x*(1 - t)*t
-    // exampleNumber(3), d(2);        // 3 example: 2d unit square, u = sin(pi*x)*sin(pi*t)
+    exampleNumber(3), d(2);        // 3 example: 2d unit square, u = sin(pi*x)*sin(pi*t)
     // exampleNumber(4), d(2);        // 4 example: 2d unit square, u = sin(6.0*pi*x)*sin(3.0*pi*t)
     // exampleNumber(5), d(2);        // 5 example: 2d unit square, u = cos(x)*exp(t)
     // exampleNumber(6), d(2);        // 6 example: 2d unit square, u = (x^2 - x) * (y^2 - y) * exp(-100 * ((x - 0.8)^2 + (y - 0.05)^2))
@@ -94,12 +94,13 @@ int main(int argc, char *argv[])
     // exampleNumber(35), d(2);        // 35 example: 2d [0, 1] x (0, 2), u = sin(pi*x)*abs(1 - y)^1.5
     // exampleNumber(37), d(2);
     // exampleNumber(38), d(2);
+    // exampleNumber(39), d(2);          // 39 example: moving spatial domain
 
     // 3d examples:
     // exampleNumber(20), d(3);     // 20 example: unit cube, u = sin(pi*x)*sin(pi*y)*sin(pi*t),        non-homogeneous BC
     // exampleNumber(25), d(3);     // 25 example: unit cube, u = (1 - x)*x^2*(1 - y)*y^2*(1 - z)*z^2,  homogeneous BC
     // exampleNumber(21), d(3);       // 21 example: unit cube, u = cos(x)*exp(y)*sin(pi*t),              non-homogeneous BC
-    exampleNumber(23), d(3);     // 23 example: 2d+1 quater annulus + [0, 1] in time, u = (1 - x)*x^2*(1 - y)*y^2*(1 - z)*z^2
+    // exampleNumber(23), d(3);     // 23 example: 2d+1 quater annulus + [0, 1] in time, u = (1 - x)*x^2*(1 - y)*y^2*(1 - z)*z^2
     // exampleNumber(24), d(3);     // 24 example: 2d+1 quater annulus + [0, 1] in time, u = sin(pi*x)*sin(pi*y)*sin(pi*z)
     // exampleNumber(26), d(3);       // 26 example: 2d+1 quater annulus + [0, 1] in time, u = (1 - x)*x^2*(1 - y)*y^2*(1 - z)*z^2
     // exampleNumber(27), d(3);     // 27 example: square x [0, 2], u = (1 - x)*x^2*(1 - y)*y^2*(2 - z)*z^2,  homogeneous BC
@@ -111,6 +112,7 @@ int main(int argc, char *argv[])
     // exampleNumber(31), d(3);     // 31 example: 3d unit cube, (x^2 - x)*(y^2 - y)*(z^2 - z)*exp(-100*((x - 0.25)^2 + (y - 0.25)^2 + (z - 0.25)^2))
     // exampleNumber(32), d(3);     // 32 example: 3d, unit square + [0, 2] in time, u = if( y > 0, (z^2 + z + 1) * (x^2 + y^2)^(1.0/3.0) * sin( (2.0*atan2(y,x) - pi)/3.0 ), (z^2 + z + 1) * (x^2 + y^2)^(1.0/3.0) * sin( (2.0*atan2(y,x) + 3.0*pi)/3.0 ) )
     // exampleNumber(36), d(3);     // 32 example: 3d, unit square + [0, 2] in time, u = if( y > 0, (z^2 + z + 1) * (x^2 + y^2)^(1.0/3.0) * sin( (2.0*atan2(y,x) - pi)/3.0 ), (z^2 + z + 1) * (x^2 + y^2)^(1.0/3.0) * sin( (2.0*atan2(y,x) + 3.0*pi)/3.0 ) )
+    // exampleNumber(40), d(3);     // 40 example: moving spatial domain
 
     // Define test-case dimentions
     //const unsigned d(2);
@@ -122,7 +124,7 @@ int main(int argc, char *argv[])
                                              withMajorantEquilibration);
 
     // Init the degree of basis S^{p, p}, where p = vDegree
-    int vDegree(2), m(1), l(1);
+    int vDegree(2), m(2), l(2);
     // Init the degree of the basis for the flux: y \in S^{p + k, p + k} + S^{p + k, p + k}, p = vDegree
     // yDegree must be >= 2 to ensure that S^{p + k, p + k} + S^{p + k, p + k} \subset H(\Omega, div§)
     int yDegree(vDegree + m);
@@ -130,13 +132,13 @@ int main(int argc, char *argv[])
 
     // Setting up the refinement strategy
     // Number of initial uniform and total unif./adapt. refinement steps
-    unsigned int numInitUniformRefV(1), numInitUniformRefY(1), numInitUniformRefW(1), numTotalAdaptRef(6);
+    unsigned int numInitUniformRefV(3), numInitUniformRefY(3), numInitUniformRefW(3), numTotalAdaptRef(8);
 
     MarkingStrategy adaptRefCrit(BULK); // with alternatives GARU, PUCA, and BULK
     //MarkingStrategy adaptRefCrit(GARU);
     real_t markingParamTheta(0.4);  // parameter theta in marking strategy
-    unsigned int yBasisRefDelay(3); // parameter for the delay in updating y_h basis for the refinement
-    unsigned int wBasisRefDelay(3); // parameter for the delay in updating w-h basis for the refinement
+    unsigned int yBasisRefDelay(7); // parameter for the delay in updating y_h basis for the refinement
+    unsigned int wBasisRefDelay(7); // parameter for the delay in updating w-h basis for the refinement
 
     testSpaceTime.gsCreateResultsFolder(saveToFile, exampleNumber,
                                         vDegree, yDegree, wDegree, yBasisRefDelay, wBasisRefDelay,
@@ -316,11 +318,12 @@ int main(int argc, char *argv[])
         // ---------------------------------------------------------------------------------------------------------- //
         // ---------------------------------------------------------------------------------------------------------- //
         int elemNumber = spaceTimeAssemblerV.multiBasis(0).basis(0).numElements();
-        std::vector<real_t> mdDistr, mIIdDistr, eH1Distr, eL2Distr, eH2Distr,
+        std::vector<real_t> mdDistr, majDistr, mIIdDistr, eH1Distr, eL2Distr, eH2Distr,
                 eSpaceTimeDistr, eSpaceTimeSpaceGradDistr,
                 eSpaceTimeSolOperDistr, eSpaceTimeDeltaxDistr, eSpaceTimeDtDistr,
                 etaDistr, minDistr, eIdentDistr;
         mdDistr.resize(elemNumber);
+        majDistr.reserve(elemNumber);
         eH1Distr.resize(elemNumber);
         etaDistr.resize(elemNumber);
         minDistr.resize(elemNumber);
@@ -387,7 +390,7 @@ int main(int argc, char *argv[])
 
 #pragma omp section
             {
-                gsSpaceTimeErrorIdentity<real_t> eIdentity(v, * fForOMP[0]);
+                gsErrEstSpaceTimeIdentity<real_t> eIdentity(v, * fForOMP[0]);
                 testSpaceTime.gsCalculateDistribution(eIdentity, eIdentDistr, elemNumber,
                                                       eIdentVector, timeAsmbSpaceTimeErrorIdentity, refCount);
                 gsInfo << "t_{e/w} ( Id )               = " <<  timeAsmbSpaceTimeErrorIdentity[refCount] << " sec.\n";
@@ -594,10 +597,14 @@ int main(int argc, char *argv[])
                                                              timeAsmbDivDivY, timeAsmbMMY, timeAsmbY, timeSolvY,
                                                              timeAsmbMajorant, timeAsmbDeltaHMajorant, timeAsmbMajorantII,
                                                              majVector, mdVector, meqVector, majhVector, majIIVector, majIIGapVector,
-                                                             mdDistr, mIIdDistr,
+                                                             mdDistr, majDistr, mIIdDistr,
                                                              e0Vector,
                                                              elemNumber,
                                                              spaceTimeAssemblerV, topSides, bottomSides);
+        gsInfo << "majDistr: \n";
+        std::for_each(mdDistr.begin(), mdDistr.end(),
+                      [](real_t x){ std::cout << x << " "; }
+            );
 
         if (refCount > 0) {
             thetaVector[refCount-1]    = eH1Vector[refCount] / eH1Vector[refCount-1];
@@ -656,7 +663,7 @@ int main(int argc, char *argv[])
         if (refCount < numTotalAdaptRef - 1) {
             testSpaceTime.gsExecuteRefinement(spaceTimeAssemblerV,
                                               basisY, spaceTimeAssemblerW,
-                                              basisYVector, basisWVector, mdDistr, //mdDistr, mdDistr, //mIIdDistr, // eIdentDistr, //eSpaceTimeSolOperDistr, //eH1Distr, //mdDistr, //eSpaceTimeDistr, //eSpaceTimeSolOperDistr, //eH1Distr, //eIdentDistr, //mdDistr,
+                                              basisYVector, basisWVector, majDistr, //mIIdDistr, // eIdentDistr, //eSpaceTimeSolOperDistr, //eH1Distr, //mdDistr, //eSpaceTimeDistr, //eSpaceTimeSolOperDistr, //eH1Distr, //eIdentDistr, //mdDistr,
                                               adaptRefCrit,
                                               markingParamTheta,
                                               refCount,

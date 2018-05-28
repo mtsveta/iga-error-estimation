@@ -44,7 +44,7 @@ namespace gismo {
 
         void gsSolveKhfhSystem(gsPoissonAssembler<real_t> &,
                                gsMatrix<>&,
-                               gsMatrix<double>&,
+                               gsMatrix<real_t>&,
                                int,
                                gsVector<real_t>&);
 
@@ -55,7 +55,7 @@ namespace gismo {
                                  gsVector<real_t>& );
 
         void gsSolveMajorantOptimalSystem(gsSparseMatrix<real_t> &, gsMatrix<> &, gsMatrix<> &,
-                                          gsMatrix<double> &, int, int, gsVector<index_t> &,
+                                          gsMatrix<real_t> &, int, int, gsVector<index_t> &,
                                           gsVector<real_t> & );
 
         void gsRecontructMajorantBasedOnOptimalFlux(int, gsMultiBasis<real_t> &, int,
@@ -63,9 +63,9 @@ namespace gismo {
                                                     const gsMultiPatch<real_t> &, const gsField<> &,
                                                     gsVector<real_t> &stopcritVector,
                                                     const gsFunctionExpr<real_t> &, real_t,
-                                                    gsVector<double> &, gsVector<double> &, gsVector<double> &,
-                                                    gsMatrix<double> &,
-                                                    gsVector<double> &,
+                                                    gsVector<real_t> &, gsVector<real_t> &, gsVector<real_t> &,
+                                                    gsMatrix<real_t> &,
+                                                    gsVector<real_t> &,
                                                     gsVector<real_t> &, gsVector<real_t> &, gsVector<real_t> &,
                                                     std::vector<real_t> &, std::vector<real_t> &,
                                                     int);
@@ -73,7 +73,7 @@ namespace gismo {
         void gsRecontructMajorantBasedOnEquilibratedFlux(int, gsMultiBasis<real_t> &, int,
                                                     gsMatrix<real_t> &, gsMultiPatch<real_t> &, gsVector<index_t> &,
                                                     gsMultiPatch<real_t> &, gsField<> &, gsFunctionExpr<real_t> &,
-                                                    gsVector<double> &, gsMatrix<double> &, gsVector<double> &,
+                                                    gsVector<real_t> &, gsMatrix<real_t> &, gsVector<real_t> &,
                                                     gsVector<real_t> &, gsVector<real_t> &, gsVector<real_t> &,
                                                     std::vector<real_t> &, std::vector<real_t> &,
                                                     int);
@@ -82,9 +82,9 @@ namespace gismo {
                                                    gsMatrix<real_t> &, gsMultiPatch<real_t> &, gsField<> &, gsVector<index_t> &,
                                                    gsVector<real_t> &,
                                                    const gsField<> &, const gsFunctionExpr<real_t> &,
-                                                   gsVector<double> &,
-                                                   gsMatrix<double> &,
-                                                   gsVector<double> &,
+                                                   gsVector<real_t> &,
+                                                   gsMatrix<real_t> &,
+                                                   gsVector<real_t> &,
                                                    gsVector<real_t> &,
                                                    std::vector<real_t> &,
                                                    int );
@@ -94,7 +94,7 @@ namespace gismo {
                                         int, gsVector<index_t> &,
                                         const gsMultiPatch<real_t> &, const gsField<> &v, const gsFunctionExpr<real_t> &,
                                         gsAssembler<> &, gsAssembler<> &,
-                                        gsVector<double> &, gsVector<double> &, gsVector<double> &, bool);
+                                        gsVector<real_t> &, gsVector<real_t> &, gsVector<real_t> &, bool);
 
         void gsExecuteRefinement(gsPoissonAssembler<real_t> &,
                                  gsMultiBasis<real_t> &, gsPoissonAssembler<real_t> &,
@@ -105,7 +105,7 @@ namespace gismo {
                                  int, int, int);
 
         void gsCalculateDistribution(gsNorm<real_t> &, std::vector<real_t> &, int,
-                                     gsVector<real_t> &, gsVector<double> &,
+                                     gsVector<real_t> &, gsVector<real_t> &,
                                      int);
 
         void gsLogTestResults(int, int, int,
@@ -113,13 +113,13 @@ namespace gismo {
                               int, int,
                               real_t, int, int,
                               gsVector<index_t> &, gsVector<index_t> &, gsVector<index_t> &,
-                              gsVector<double> &, gsVector<double> &, gsVector<double> &, gsVector<double> &, gsVector<double> &,
-                              gsMatrix<double> &, gsMatrix<double> &, gsMatrix<double> &,
-                              gsVector<double> &, gsVector<double> &, gsVector<double> &, gsVector<double> &,
+                              gsVector<real_t> &, gsVector<real_t> &, gsVector<real_t> &, gsVector<real_t> &, gsVector<real_t> &,
+                              gsMatrix<real_t> &, gsMatrix<real_t> &, gsMatrix<real_t> &,
+                              gsVector<real_t> &, gsVector<real_t> &, gsVector<real_t> &, gsVector<real_t> &,
                               gsVector<real_t> &, gsVector<real_t> &, gsVector<real_t> &,
                               gsVector<real_t> &, gsVector<real_t> &, gsVector<real_t> &, gsVector<real_t> &, gsVector<real_t> &);
 
-        void gsLogAssemblingSolvingTime(gsVector<double> &, gsVector<double> &, int);
+        void gsLogAssemblingSolvingTime(gsVector<real_t> &, gsVector<real_t> &, int);
 
         void gsLogRefinementIterationInfo(int refCounter, gsVector<index_t> &, gsVector<index_t> &, gsVector<index_t> &, gsVector<real_t> &, gsVector<real_t> &, gsVector<real_t> &,
                                           gsVector<real_t> &, gsVector<real_t> &, gsVector<real_t> &, gsVector<real_t> &, gsVector<real_t> &);
@@ -132,8 +132,7 @@ namespace gismo {
                                                  gsMultiBasis<> &basis,
                                                  std::vector<real_t> edDistr,
                                                  std::vector<real_t> mdDistr,
-                                                 std::vector<real_t> etaDistr,
-                                                 int refCounter, int refTotal);
+                                                 int refCounter);
 
         void gsSaveToFileTestResults(bool save,
                                      gsVector<index_t> &vDOFs, gsVector<index_t> &yDOFs, gsVector<index_t> &wDOFs,
@@ -208,7 +207,7 @@ namespace gismo {
     }
     template<unsigned d>
     void gsTestMajorant<d>::initGivenProblemData() {
-        const double PI = 3.14159265359;
+        const real_t PI = 3.14159265359;
         const int NUM_PATCHES = 1;
 
         switch (d) {
@@ -221,7 +220,7 @@ namespace gismo {
                     exampleNumber == 4 || exampleNumber == 5 ||
                     exampleNumber == 6) {
                     real_t unit_side(1.0);
-                    patches = *gsNurbsCreator<>::BSplineSquareGrid(NUM_PATCHES, NUM_PATCHES, unit_side);
+                    patches = gsNurbsCreator<>::BSplineSquareGrid(NUM_PATCHES, NUM_PATCHES, unit_side);
                     cFriedrichs = 1.0 / (math::sqrt((real_t) dim) * PI);
                     domainName = "unit square";
                 } else if (exampleNumber == 7 || exampleNumber == 8) {
@@ -248,7 +247,7 @@ namespace gismo {
                         patches = *gsNurbsCreator<>::BSplineLShape_p2C0();
                     } else if (exampleNumber == 12) {
                         /// L-Shaped domain represented as a tensor B-spline of degree 2
-                        /// with C1-continuity and double control points at the corners.
+                        /// with C1-continuity and real_t control points at the corners.
                         patches = *gsNurbsCreator<>::BSplineLShape_p2C1();
                     }
                     cFriedrichs = 1.0 / (math::sqrt((real_t) 1 / (real_t) 2) * PI);
@@ -285,7 +284,7 @@ namespace gismo {
                 }
                 else if (exampleNumber == 14 || exampleNumber == 18){
                     std::string fileSrc = gsFileManager::find( "volumes/GshapedVolume.xml" );
-                    patches = static_cast<gsMultiPatch<> > (gsReadFile<real_t>(fileSrc));
+                    gsReadFile<real_t>(fileSrc, patches);
 
                     cFriedrichs = 1.0 / (math::sqrt((real_t) dim) * PI);
                     domainName = "g-shaped domain";
@@ -520,7 +519,7 @@ namespace gismo {
     void
     gsTestMajorant<d>::gsCalculateDistribution(gsNorm<real_t> &residual, std::vector<real_t> &resDistr, int elemNum,
                                                gsVector<real_t> &resValsVector,
-                                               gsVector<double> &timeAsmb,
+                                               gsVector<real_t> &timeAsmb,
                                                int refCounter) {
         gsCPUStopwatch clock;
         // Compute the residual error indicator
@@ -538,13 +537,12 @@ namespace gismo {
                                                                    gsVector<index_t> &yDOFs,
                                                                    const gsMultiPatch<real_t> &mpV, const gsField<> &v,
                                                                    gsVector<real_t> &stopcritVector,
-                                                                   const gsFunctionExpr<real_t> &fFunc,
-                                                                   real_t fL2NormSq,
-                                                                   gsVector<double> &timeAsmblDivDivY,
-                                                                   gsVector<double> &timeAsmblVectMassY,
-                                                                   gsVector<double> &timeAsmblY,
-                                                                   gsMatrix<double> &timeSolvY,
-                                                                   gsVector<double> &timeAsmblMaj,
+                                                                   const gsFunctionExpr<real_t> &fFunc, real_t fL2NormSq,
+                                                                   gsVector<real_t> &timeAsmblDivDivY,
+                                                                   gsVector<real_t> &timeAsmblVectMassY,
+                                                                   gsVector<real_t> &timeAsmblY,
+                                                                   gsMatrix<real_t> &timeSolvY,
+                                                                   gsVector<real_t> &timeAsmblMaj,
                                                                    gsVector<real_t> &majVector,
                                                                    gsVector<real_t> &mdVector,
                                                                    gsVector<real_t> &meqVector,
@@ -720,9 +718,9 @@ namespace gismo {
                                                                         gsVector<index_t> &yDOFs,
                                                                         gsMultiPatch<real_t> &mpV, gsField<> &v,
                                                                         gsFunctionExpr<real_t> &fFunc,
-                                                                        gsVector<double> &timeAsmblEquilY,
-                                                                        gsMatrix<double> &timeSolvEquilY,
-                                                                        gsVector<double> &timeAsmblMaj,
+                                                                        gsVector<real_t> &timeAsmblEquilY,
+                                                                        gsMatrix<real_t> &timeSolvEquilY,
+                                                                        gsVector<real_t> &timeAsmblMaj,
                                                                         gsVector<real_t> &majVector,
                                                                         gsVector<real_t> &mdVector,
                                                                         gsVector<real_t> &meqVector,
@@ -762,7 +760,7 @@ namespace gismo {
         //divdivSys.reserve(this->dim * math::ipow(this->dim * yDegree + 1, this->dim), divPde.numRhs());
         divdivSys.reserve(math::ipow(this->dim * (this->dim * yDegree + 1), this->dim), divPde.numRhs());
         divdivAssembler.setSparseSystem(divdivSys);             // set the spare matrix for the system
-        divdivAssembler.push<gsVisitorDivDiv<real_t>>();       // push the assembling procedure
+        divdivAssembler.push<gsVisitorDivDiv<real_t> >();       // push the assembling procedure
         divdivAssembler.finalize();
         timeAsmblEquilY[refCounter] = clock.stop();
         gsInfo << "time for equilibration : " << timeAsmblEquilY[refCounter] << "\n";
@@ -831,9 +829,9 @@ namespace gismo {
                                                                    gsMatrix<real_t> &wVector, gsMultiPatch<real_t> &mpW, gsField<>& w, gsVector<index_t> &wDOFs,
                                                                    gsVector<real_t> &stopcritVector,
                                                                    const gsField<> &v, const gsFunctionExpr<real_t> &fFunc,
-                                                                   gsVector<double> &timeAsmblW,
-                                                                   gsMatrix<double> &timeSolvW,
-                                                                   gsVector<double> &timeAsmblMin,
+                                                                   gsVector<real_t> &timeAsmblW,
+                                                                   gsMatrix<real_t> &timeSolvW,
+                                                                   gsVector<real_t> &timeAsmblMin,
                                                                    gsVector<real_t> &minVector,
                                                                    std::vector<real_t> &minDistr,
                                                                    int elemNum) {
@@ -886,9 +884,9 @@ namespace gismo {
                                                        const gsMultiPatch<real_t> &mpV, const gsField<> &v,
                                                        const gsFunctionExpr<real_t> &fFunc,
                                                        gsAssembler<> &divdivAssembler, gsAssembler<> &dualAssembler,
-                                                       gsVector<double> &timeAsmblDivDivY,
-                                                       gsVector<double> &timeAsmblVectMassY,
-                                                       gsVector<double> &timeAsmblY,
+                                                       gsVector<real_t> &timeAsmblDivDivY,
+                                                       gsVector<real_t> &timeAsmblVectMassY,
+                                                       gsVector<real_t> &timeAsmblY,
                                                        bool saveToFile) {
         //gsBoundaryConditions<> freeBC;
         int numMappers = 1;
@@ -920,7 +918,7 @@ namespace gismo {
                 //divdivSys.reserve(this->dim * math::ipow(this->dim * yDegree + 1, this->dim), divPde.numRhs());
                 divdivSys.reserve(math::ipow(this->dim * (this->dim * yDegree + 1), this->dim), divPde.numRhs());
                 divdivAssembler.setSparseSystem(divdivSys);             // set the spare matrix for the system
-                divdivAssembler.push<gsVisitorDivDiv<real_t>>();       // push the assembling procedure
+                divdivAssembler.push<gsVisitorDivDiv<real_t> >();       // push the assembling procedure
                 divdivAssembler.finalize();
                 timeAsmblDivDivY[refCounter] = clock_1.stop();
             }
@@ -938,7 +936,7 @@ namespace gismo {
                 // this->dim * math::ipow(this->dim * yDegree + 1
                 vectMassSys.reserve(math::ipow(this->dim * (this->dim * yDegree + 1), this->dim), dualPde.numRhs());
                 dualAssembler.setSparseSystem(vectMassSys);
-                dualAssembler.push<gsVisitorDualPoisson<real_t>>();
+                dualAssembler.push<gsVisitorDualPoisson<real_t> >();
                 dualAssembler.finalize();
                 timeAsmblVectMassY[refCounter] = clock_2.stop();
             }
@@ -953,13 +951,13 @@ namespace gismo {
                                              real_t markingParamTheta, int numInitUniformRef, int numTotalAdaptRef,
                                              gsVector<index_t> &vDOFs, gsVector<index_t> &yDOFs,
                                              gsVector<index_t> &wDOFs,
-                                             gsVector<double> &timeAsmbV, gsVector<double> &timeAsmbDivDivY,
-                                             gsVector<double> &timeAsmbMMY, gsVector<double> &timeAsmbY,
-                                             gsVector<double> &timeAsmbW,
-                                             gsMatrix<double> &timeSolvV, gsMatrix<double> &timeSolvY,
-                                             gsMatrix<double> &timeSolvW,
-                                             gsVector<double> &timeAsmbError, gsVector<double> &timeAsmbMajorant,
-                                             gsVector<double> &timeAsmbMinorant, gsVector<double> &timeAsmbEtaIndicator,
+                                             gsVector<real_t> &timeAsmbV, gsVector<double> &timeAsmbDivDivY,
+                                             gsVector<real_t> &timeAsmbMMY, gsVector<double> &timeAsmbY,
+                                             gsVector<real_t> &timeAsmbW,
+                                             gsMatrix<real_t> &timeSolvV, gsMatrix<double> &timeSolvY,
+                                             gsMatrix<real_t> &timeSolvW,
+                                             gsVector<real_t> &timeAsmbError, gsVector<double> &timeAsmbMajorant,
+                                             gsVector<real_t> &timeAsmbMinorant, gsVector<double> &timeAsmbEtaIndicator,
                                              gsVector<real_t> &eVector, gsVector<real_t> &relErrorVector,
                                              gsVector<real_t> &relError0Vector,
                                              gsVector<real_t> &majVector, gsVector<real_t> &mdVector,
@@ -1067,10 +1065,10 @@ namespace gismo {
                         cast<real_t, double>(majVector[refCounter + 1] / minVector[refCounter + 1]),
                         cast<real_t, double>(etaVector[refCounter + 1] / eVector[refCounter + 1]),
                         cast<real_t, double>(math::log(eVector[refCounter + 1] / eVector[refCounter]) /
-                                             std::log(std::pow((double) vDOFs[refCounter + 1],
-                                                               ((double) (-1) / (double) d)) /
-                                                      std::pow((double) vDOFs[refCounter],
-                                                               ((double) (-1) / (double) d)))));
+                                             math::log(math::pow((real_t) vDOFs[refCounter + 1],
+                                                               ((real_t) (-1) / (real_t) d)) /
+                                                      math::pow((real_t) vDOFs[refCounter],
+                                                               ((real_t) (-1) / (real_t) d)))));
         }
 
         gsInfo << "\n REF &  || u - u_i || & \t maj & I_{eff}(maj) &  \t       min & I_{eff}(min) &     maj / min & order(e) \\\\\n";
@@ -1084,10 +1082,10 @@ namespace gismo {
                         cast<real_t, double>(minVector[refCounter + 1] / eVector[refCounter + 1]),
                         cast<real_t, double>(majVector[refCounter + 1] / minVector[refCounter + 1]),
                         cast<real_t, double>(math::log(eVector[refCounter + 1] / eVector[refCounter]) /
-                                             std::log(std::pow((double) vDOFs[refCounter + 1],
-                                                               ((double) (-1) / (double) d)) /
-                                                      std::pow((double) vDOFs[refCounter],
-                                                               ((double) (-1) / (double) d)))));
+                                             math::log(math::pow((real_t) vDOFs[refCounter + 1],
+                                                               ((real_t) (-1) / (real_t) d)) /
+                                                      math::pow((real_t) vDOFs[refCounter],
+                                                               ((real_t) (-1) / (real_t) d)))));
         }
 
         gsInfo << "\n-------------------------------------------------------------------------------------------------\n";
@@ -1339,8 +1337,7 @@ namespace gismo {
                                                                 gsMultiBasis<> &basis,
                                                                 std::vector<real_t> edDistr,
                                                                 std::vector<real_t> mdDistr,
-                                                                std::vector<real_t> etaDistr,
-                                                                int refCounter, int refTotal) {
+                                                                int refCounter) {
         if (save) {
             // Saving Paraview files
             std::string refTag = util::to_string(exampleNumber) + "-refnum-"
@@ -1367,18 +1364,13 @@ namespace gismo {
             else {
                 int size = edDistr.size();
                 file << "e_distr = [";
-                for (int refCounter = 0; refCounter < size; ++refCounter) file << edDistr[refCounter] << ", ";
+                for (int elCount = 0; elCount < size; ++elCount) file << edDistr[elCount] << ", ";
                 file << "]; \n";
 
                 file << "m_distr = [";
-                for (int refCounter = 0; refCounter < size; ++refCounter) file << mdDistr[refCounter] << ", ";
+                for (int elCount = 0; elCount < size; ++elCount) file << mdDistr[elCount] << ", ";
                 file << "]; \n";
 
-                /*
-                file << "eta_distr = [";
-                for (int refCounter = 0; refCounter < size; ++refCounter) file << etaDistr[refCounter] << ", ";
-                file << "]; \n";
-                */
                 file.close();
             }
 
@@ -1517,7 +1509,7 @@ namespace gismo {
     template<unsigned d>
     void gsTestMajorant<d>::gsSolveKhfhSystem(gsPoissonAssembler<real_t>& assembler,
                                               gsMatrix<>& vVector,
-                                              gsMatrix<double>& timeSolvV,
+                                              gsMatrix<real_t>& timeSolvV,
                                               int refCounter,
                                               gsVector<real_t>& stopcritVector) {
 
@@ -1525,9 +1517,9 @@ namespace gismo {
         gsMatrix<> vVectorIter, vVectorDir;
 
         int N = assembler.rhs().size();
-        real_t hPowD = std::pow((double) N, (double)(- 1));
+        real_t hPowD = math::pow((real_t) N, (real_t)(- 1));
         index_t maxItersCGV = 3 * N;
-        real_t tolCGV = (refCounter > 1) ? stopcritVector[refCounter-2] : hPowD * std::pow(10.0, -2);
+        real_t tolCGV = (refCounter > 1) ? stopcritVector[refCounter-2] : hPowD * math::pow(10.0, -2);
 
         if (refCounter == 0) {
             gsSparseSolver<>::LU solverLU;
@@ -1594,8 +1586,8 @@ namespace gismo {
 
 
         int N = assembler.rhs().size();
-        real_t hPowD = std::pow((double) N, (double)(- 1)); // O(h^d) ~ O(1/N)
-        real_t tolCGW = (refCounter > 1) ? stopcritVector[refCounter-2] * std::pow(10.0, -3) : hPowD * std::pow(10.0, -4);
+        real_t hPowD = math::pow((real_t) N, (real_t)(- 1)); // O(h^d) ~ O(1/N)
+        real_t tolCGW = (refCounter > 1) ? stopcritVector[refCounter-2] * math::pow(10.0, -3) : hPowD * math::pow(10.0, -4);
         index_t maxItersCGW = 3 * N;
 
         gsLinearOperator<>::Ptr preConMat = gsIdentityOp<>::make(N);
@@ -1657,7 +1649,7 @@ namespace gismo {
 
     template <unsigned d>
     void gsTestMajorant<d>:: gsSolveMajorantOptimalSystem(gsSparseMatrix<real_t> & yM, gsMatrix<real_t> & yRhs, gsMatrix<real_t> & yVector,
-                                                          gsMatrix<double> & timeSolvY, int refCounter, int iterMaj, gsVector<index_t> &yDOFs,
+                                                          gsMatrix<real_t> & timeSolvY, int refCounter, int iterMaj, gsVector<index_t> &yDOFs,
                                                           gsVector<real_t> & stopcritVector)
     {
 
@@ -1665,9 +1657,9 @@ namespace gismo {
         gsMatrix<> yVectorIter, yVectorDir;
 
         int N = yRhs.size();
-        real_t hPowD = std::pow((double) N, -1.0);
-        //real_t tolCGY = hPowD * std::pow(10.0, -6);
-        real_t tolCGY = (refCounter > 1) ? stopcritVector[refCounter-2] * std::pow(10.0, -2) : hPowD * std::pow(10.0, -6);
+        real_t hPowD = math::pow((real_t) N, -1.0);
+        //real_t tolCGY = hPowD * math::pow(10.0, -6);
+        real_t tolCGY = (refCounter > 1) ? stopcritVector[refCounter-2] * math::pow(10.0, -2) : hPowD * math::pow(10.0, -6);
         index_t maxIters = 3 * N;
 
         gsOptionList opt = gsIterativeSolver<real_t>::defaultOptions();
